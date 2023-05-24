@@ -11,4 +11,5 @@ export interface Item {
   title: string;
   createdAt: string;
   updatedAt: string;
+  isDisabled: boolean;
 }

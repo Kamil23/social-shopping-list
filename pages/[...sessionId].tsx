@@ -7,45 +7,87 @@ import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
+import Empty from "@/components/Empty";
+import { APIUrl } from "@/enum";
 
-export default function SessionList({ sessionData }: { sessionData: SessionData }) {
-  debugger;
+export default function SessionList({
+  sessionData,
+}: {
+  sessionData: SessionData;
+}) {
   const now = new Date();
   const router = useRouter();
-  const { items } = sessionData;
+  const { items } = sessionData || {};
   const [inputValue, setInputValue] = useState("");
-  const [localItems, setLocalItems] = useState(items);
+  const [localItems, setLocalItems] = useState(items || []);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("event", e);
-    console.log("submit");
-    setLocalItems([...localItems, {
-      id: "4",
-      title: inputValue,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    }])
-    setInputValue("");
+    try {
+      const submittedData = {
+        id: window.crypto.randomUUID(),
+        title: inputValue,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        sessionId: sessionData.id,
+        isDisabled: false
+      };
+
+      setLocalItems([...localItems, submittedData]);
+      setInputValue("");
+
+      const JSONdata = JSON.stringify(submittedData);
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSONdata
+      }
+      await fetch(APIUrl.CreateItem, options);
+    } catch (error) {
+      console.error('Create item error: ', error);
+    }
   };
 
-  console.log(items);
+  const renderContent = () => {
+    if (!sessionData?.id) {
+      return (
+        <div className="flex justify-center items-center h-full">
+          <Empty />
+        </div>
+      );
+    }
+    return (
+      <>
+        <ListTitle updatedAt={sessionData?.createdAt} />
+        <div className="flex flex-col">
+          {localItems?.map((item: Item) => (
+            <ListItem
+              key={item.id}
+              id={item.id}
+              name={item.title}
+              updatedAt={item.createdAt}
+              isDisabled={item.isDisabled}
+            />
+          ))}
+        </div>
+        <Input
+          handleChange={setInputValue}
+          handleSubmit={handleSubmit}
+          value={inputValue}
+        />
+      </>
+    );
+  };
 
   return (
     <Layout>
       <Head>
         <title>{`Lista zakupowa: ${router.query.sessionId}`}</title>
       </Head>
-      <main>
-        <ListTitle updatedAt={sessionData.createdAt} />
-        <div className="flex flex-col">
-          {localItems?.map((item: Item) => (
-            <ListItem key={item.id} name={item.title} createdAt={item.createdAt} />
-          ))}
-        </div>
-        <Input handleChange={setInputValue} handleSubmit={handleSubmit} value={inputValue} />
-      </main>
+      {renderContent()}
     </Layout>
   );
 }
