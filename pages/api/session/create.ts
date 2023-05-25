@@ -15,7 +15,6 @@ export default async function createSession(
 ) {
   const now = new Date().toISOString();
   const sessionId = crypto.randomUUID();
-  debugger;
   await prisma.session.create({
     data: {
       id: sessionId,

@@ -16,7 +16,6 @@ export default async function getSession(
 ) {
   const { query } = req;
   const queryParams = query.sessionId;
-  debugger;
   const sessionData = await prisma.session.findUnique({
     //@ts-ignore
     where: { id: queryParams },
