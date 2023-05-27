@@ -5,7 +5,7 @@ export default function ListTitle({ updatedAt }: { updatedAt: string }) {
   return (
     <div className="flex flex-col mb-8">
       <div>{`Lista zakupowa: ${router.query.sessionId}`}</div>
-      <div className="text-xs">{`Ostatni update: ${updatedAt || "Brak"}`}</div>
+      <div className="text-xs">{`Ostatnia zmiana: ${updatedAt || "Brak"}`}</div>
     </div>
   )
 }

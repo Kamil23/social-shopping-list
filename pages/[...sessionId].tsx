@@ -5,9 +5,17 @@ import Head from "next/head";
 import { prisma } from "@/lib/prisma";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { Item, SessionData } from "@/types/sessionList";
+import { Item, Nullable, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import {
+  Dispatch,
+  DragEvent,
+  FormEvent,
+  MutableRefObject,
+  SetStateAction,
+  useRef,
+  useState,
+} from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
 import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
@@ -17,14 +25,14 @@ export default function SessionList({
 }: {
   sessionData: SessionData;
 }) {
-
   const now = new Date();
   const router = useRouter();
   const { items } = sessionData || {};
   const [inputValue, setInputValue] = useState("");
   const [localItems, setLocalItems] = useState(
-    items.sort(sortByUpdatedAtAndIsDisabled) || []
+    items?.sort(sortByUpdatedAtAndIsDisabled) || []
   );
+  const [dragging, setDragging] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,7 +46,9 @@ export default function SessionList({
         isDisabled: false,
       };
 
-      setLocalItems([...localItems, submittedData].sort(sortByUpdatedAtAndIsDisabled));
+      setLocalItems(
+        [...localItems, submittedData].sort(sortByUpdatedAtAndIsDisabled)
+      );
       setInputValue("");
 
       const JSONdata = JSON.stringify(submittedData);
@@ -92,6 +102,51 @@ export default function SessionList({
       console.error("Modify list item error: ", error);
     }
   };
+  const dragItem: MutableRefObject<Item> = useRef({} as Item);
+  const dragNode: MutableRefObject<Nullable<EventTarget>> = useRef(
+    {} as HTMLInputElement
+  );
+
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, item: Item) => {
+    setTimeout(() => {
+      setDragging(true);
+    }, 0);
+    dragItem.current = item;
+    dragNode.current = e.target;
+    dragNode.current.addEventListener("dragend", handleDragEnd);
+  };
+
+  const handleDragEnd = () => {
+    setDragging(false);
+    //@ts-ignore
+    dragNode.current.removeEventListener("dragend", handleDragEnd);
+    dragItem.current = {} as Item;
+    dragNode.current = null;
+  };
+
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>, item: Item) => {
+    if (e.target !== dragNode.current) {
+      setLocalItems((oldItems) => {
+        const newItems: Item[] = JSON.parse(JSON.stringify(oldItems));
+        const currentItemIndex = localItems.findIndex(
+          (element) => element.id === dragItem.current.id
+        );
+        const dragItemIndex = localItems.findIndex(
+          (element) => element.id === item.id
+        );
+        newItems.splice(
+          dragItemIndex,
+          0,
+          newItems.splice(currentItemIndex, 1)[0]
+        );
+        dragItem.current = newItems[dragItemIndex];
+        return newItems;
+      });
+    }
+  };
+
+  const _tempList = JSON.parse(JSON.stringify(localItems));
+  const lastUpdate = _tempList.sort((a: Item, b: Item) => b.updatedAt.localeCompare(a.updatedAt))[0]?.updatedAt;
 
   const renderContent = () => {
     if (!sessionData?.id) {
@@ -103,16 +158,17 @@ export default function SessionList({
     }
     return (
       <>
-        <ListTitle updatedAt={sessionData?.createdAt} />
+        <ListTitle updatedAt={lastUpdate} />
         <div className="flex flex-col">
           {localItems?.map((item: Item) => (
             <ListItem
               key={item.id}
-              id={item.id}
-              name={item.title}
-              updatedAt={item.updatedAt}
-              isDisabled={item.isDisabled}
+              data={item}
               toggleCheck={toggleCheck}
+              handleDragStart={handleDragStart}
+              handleDragEnter={handleDragEnter}
+              dragging={dragging}
+              currentDragItem={dragItem}
             />
           ))}
         </div>

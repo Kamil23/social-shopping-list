@@ -13,3 +13,5 @@ export interface Item {
   updatedAt: string;
   isDisabled: boolean;
 }
+
+export type Nullable<NullableType> = NullableType | null | undefined;
