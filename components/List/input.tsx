@@ -8,7 +8,7 @@ export default function Input({ value, handleChange, handleSubmit }: { value: st
         value={value}
         placeholder="Dodaj coś do listy..."
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-indigo-500 placeholder-gray-400"
+        className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-indigo-500 placeholder-gray-400"
       />
     </form>
   );

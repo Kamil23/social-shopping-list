@@ -1,11 +1,25 @@
-import { useRouter } from "next/router"
+import { useRouter } from "next/router";
+import Button from "../Button";
+import { useState } from "react";
 
 export default function ListTitle({ updatedAt }: { updatedAt: string }) {
-  const router = useRouter()
+  const router = useRouter();
+  const [isCopied, setIsCopied] = useState(false);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
+  }
   return (
-    <div className="flex flex-col mb-8">
-      <div>{`Lista zakupowa: ${router.query.sessionId}`}</div>
-      <div className="text-xs">{`Ostatnia zmiana: ${updatedAt || "Brak"}`}</div>
+    <div className="flex flex-col space-y-1 mb-4">
+      <div className="whitespace-nowrap overflow-hidden text-ellipsis">{`Lista zakupowa: ${router.query.sessionId}`}</div>
+      <div className="flex space-x-2 items-center">
+        <div className="text-xs">{`Ostatnia zmiana: ${new Date(
+          updatedAt
+        ).toLocaleDateString()} ${
+          new Date(updatedAt).toLocaleTimeString() || "Brak"
+        }`}</div>
+        <Button title={`${isCopied ? "Skopiowano!" : "Skopiuj link"}`} handler={handleCopyLink} />
+      </div>
     </div>
-  )
+  );
 }

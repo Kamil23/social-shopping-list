@@ -1,18 +1,17 @@
 import { Item } from "@/types/sessionList";
 import clsx from "clsx";
-import {
-  Dispatch,
-  DragEvent,
-  MutableRefObject,
-  SetStateAction,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { RxDragHandleDots2 } from "react-icons/rx";
 
 export default function ListItem({
   data,
+  isDragging,
+  draggableId,
   toggleCheck,
 }: {
   data: Item;
+  isDragging: boolean;
+  draggableId: string;
   toggleCheck: (
     id: string,
     isChecked: boolean,
@@ -26,21 +25,25 @@ export default function ListItem({
 
   return (
     <div
-      className={`flex p-2 space-x-2 items-baseline text-slate-800 rounded-md ${clsx(
-        {
-          ["line-through text-slate-400"]: isChecked,
-          // ["bg-yellow-100 text-slate-300"]:
-          //   dragging && currentDragItem.current.id === id,
-        }
-      )}`}
+      className={`flex p-2 space-x-2 items-center text-slate-800 ${clsx({
+        ["line-through text-slate-400"]: isChecked,
+        ["bg-yellow-100 text-slate-300"]: isDragging && draggableId === id,
+      })}`}
     >
       <input
         type="checkbox"
+        className="w-6 h-6"
         checked={isChecked}
         onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)}
       />
-      <div>{title}</div>
-      <div className="text-[10px]">{updateTime}</div>
+      <div className="flex w-full justify-between items-center">
+        <div>{title}</div>
+        <RxDragHandleDots2 className="mr-4 text-xl" />
+      </div>
+
+      {/* <div className="flex h-0 items-baseline">
+        <div className="text-[8px]">{new Date(updateTime).toLocaleDateString()}</div>
+      </div> */}
     </div>
   );
 }

@@ -10,8 +10,9 @@ import Input from "@/components/List/input";
 import {
   Dispatch,
   FormEvent,
+  MutableRefObject,
   SetStateAction,
-  useEffect,
+  useRef,
   useState,
 } from "react";
 import Empty from "@/components/Empty";
@@ -33,6 +34,10 @@ export default function SessionList({
   const [localItems, setLocalItems] = useState(
     items?.sort(sortByUpdatedAtAndIsDisabled) || []
   );
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggableId, setDraggableId] = useState("");
+
+  const dragItem: MutableRefObject<Item> = useRef({} as Item);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,7 +50,7 @@ export default function SessionList({
         updatedAt: now.toISOString(),
         sessionId: sessionData.id,
         isDisabled: false,
-        sortOrder: itemsLength + 1
+        sortOrder: itemsLength + 1,
       };
 
       setLocalItems(
@@ -67,6 +72,18 @@ export default function SessionList({
     }
   };
 
+  interface DraggableData {
+    draggableId: string;
+    mode: string;
+    source: {};
+    type: string;
+  }
+
+  const handleOnDragStart = async (result: DraggableData) => {
+    setIsDragging(true);
+    setDraggableId(result.draggableId);
+  };
+
   const handleOnDragEnd = async (result: any) => {
     if (!result.destination) return;
 
@@ -75,9 +92,10 @@ export default function SessionList({
 
     tasks.splice(result.destination.index, 0, reorderedItem);
 
-    tasks.map((task, index) => task.sortOrder = index + 1);
+    tasks.map((task, index) => (task.sortOrder = index + 1));
 
     setLocalItems(tasks.sort(sortByUpdatedAtAndIsDisabled));
+    setIsDragging(false);
 
     await updateSession(tasks, router.query.sessionId);
   };
@@ -134,8 +152,11 @@ export default function SessionList({
       );
     }
     return (
-      <DragDropContext onDragEnd={handleOnDragEnd}>
-        <StrictModeDroppable droppableId="todos">
+      <DragDropContext
+        onDragEnd={handleOnDragEnd}
+        onDragStart={handleOnDragStart}
+      >
+        <StrictModeDroppable droppableId="list">
           {(provided) => (
             <section {...provided.droppableProps} ref={provided.innerRef}>
               <ListTitle updatedAt={lastUpdate} />
@@ -151,6 +172,8 @@ export default function SessionList({
                         <ListItem
                           key={item.id}
                           data={item}
+                          isDragging={isDragging}
+                          draggableId={draggableId}
                           toggleCheck={toggleCheck}
                         />
                       </article>
