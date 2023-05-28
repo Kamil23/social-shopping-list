@@ -12,6 +12,7 @@ export interface Item {
   createdAt: string;
   updatedAt: string;
   isDisabled: boolean;
+  sortOrder: number;
 }
 
 export type Nullable<NullableType> = NullableType | null | undefined;

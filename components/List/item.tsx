@@ -11,10 +11,6 @@ import {
 export default function ListItem({
   data,
   toggleCheck,
-  handleDragStart,
-  handleDragEnter,
-  dragging,
-  currentDragItem,
 }: {
   data: Item;
   toggleCheck: (
@@ -23,10 +19,6 @@ export default function ListItem({
     setIsChecked: Dispatch<SetStateAction<boolean>>,
     setUpdateTime: Dispatch<SetStateAction<string>>
   ) => void;
-  handleDragStart: (e: DragEvent<HTMLDivElement>, item: Item) => void;
-  handleDragEnter: (e: DragEvent<HTMLDivElement>, item: Item) => void;
-  dragging: boolean;
-  currentDragItem: MutableRefObject<Item>;
 }) {
   const { id, title, updatedAt, isDisabled } = data;
   const [isChecked, setIsChecked] = useState(isDisabled || false);
@@ -34,14 +26,11 @@ export default function ListItem({
 
   return (
     <div
-      draggable
-      onDragStart={(e) => handleDragStart(e, data)}
-      onDragEnter={(e) => handleDragEnter(e, data)}
       className={`flex p-2 space-x-2 items-baseline text-slate-800 rounded-md ${clsx(
         {
           ["line-through text-slate-400"]: isChecked,
-          ["bg-yellow-100 text-slate-300"]:
-            dragging && currentDragItem.current.id === id,
+          // ["bg-yellow-100 text-slate-300"]:
+          //   dragging && currentDragItem.current.id === id,
         }
       )}`}
     >

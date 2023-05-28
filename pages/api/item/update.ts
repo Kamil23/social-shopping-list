@@ -16,7 +16,7 @@ interface RequestBody {
   isDisabled?: boolean;
 }
 
-export default async function modifyItem(
+export default async function updateItem(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
@@ -29,8 +29,9 @@ export default async function modifyItem(
         ...requestData,
       },
     });
-    res.status(201).json({ code: 201, status: "Item modified successfully!" });
+    res.status(201).json({ code: 201, status: "Item updated successfully!" });
   } catch (error) {
+    res.status(500).json({ code: 500, status: "Problem with updating item" });
     console.error('Error updating item: ', error);
   }
 }

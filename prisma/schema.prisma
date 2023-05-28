@@ -11,13 +11,14 @@ datasource db {
 }
 
 model Item {
-  id          String   @id @default(uuid())
-  title       String
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  isDisabled  Boolean @default(false)
-  sessionId   String?
-  Session     Session? @relation(fields: [sessionId], references: [id])
+  id         String   @id @default(uuid())
+  title      String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  sessionId  String?
+  isDisabled Boolean  @default(false)
+  sortOrder  Int
+  Session    Session? @relation(fields: [sessionId], references: [id])
 }
 
 model Session {

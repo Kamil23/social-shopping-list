@@ -14,6 +14,7 @@ interface RequestBody {
   updatedAt: Date;
   sessionId: UUID;
   isDisabled: boolean;
+  sortOrder: number;
 }
 
 export default async function createItem(
@@ -22,7 +23,7 @@ export default async function createItem(
 ) {
   try {
     const requestData: RequestBody = req.body;
-    const { id, title, createdAt, updatedAt, sessionId, isDisabled } =
+    const { id, title, createdAt, updatedAt, sessionId, isDisabled, sortOrder } =
       requestData;
     await prisma.item.create({
       data: {
@@ -32,6 +33,7 @@ export default async function createItem(
         updatedAt,
         sessionId,
         isDisabled,
+        sortOrder
       },
     });
     res.status(201).json({ code: 201, status: "Item created successfully!" });

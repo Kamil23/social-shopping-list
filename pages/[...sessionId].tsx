@@ -5,20 +5,21 @@ import Head from "next/head";
 import { prisma } from "@/lib/prisma";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { Item, Nullable, SessionData } from "@/types/sessionList";
+import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
 import {
   Dispatch,
-  DragEvent,
   FormEvent,
-  MutableRefObject,
   SetStateAction,
-  useRef,
+  useEffect,
   useState,
 } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
 import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
+import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
+import { updateSession } from "@/requests";
 
 export default function SessionList({
   sessionData,
@@ -32,11 +33,11 @@ export default function SessionList({
   const [localItems, setLocalItems] = useState(
     items?.sort(sortByUpdatedAtAndIsDisabled) || []
   );
-  const [dragging, setDragging] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      const itemsLength = localItems.length;
       const submittedData = {
         id: window.crypto.randomUUID(),
         title: inputValue,
@@ -44,6 +45,7 @@ export default function SessionList({
         updatedAt: now.toISOString(),
         sessionId: sessionData.id,
         isDisabled: false,
+        sortOrder: itemsLength + 1
       };
 
       setLocalItems(
@@ -63,6 +65,21 @@ export default function SessionList({
     } catch (error) {
       console.error("Create item error: ", error);
     }
+  };
+
+  const handleOnDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const tasks = [...localItems];
+    const [reorderedItem] = tasks.splice(result.source.index, 1);
+
+    tasks.splice(result.destination.index, 0, reorderedItem);
+
+    tasks.map((task, index) => task.sortOrder = index + 1);
+
+    setLocalItems(tasks.sort(sortByUpdatedAtAndIsDisabled));
+
+    await updateSession(tasks, router.query.sessionId);
   };
 
   const toggleCheck = async (
@@ -97,56 +114,16 @@ export default function SessionList({
         },
         body: JSONdata,
       };
-      await fetch(APIUrl.ModifyItem, options);
+      await fetch(APIUrl.UpdateItem, options);
     } catch (error) {
       console.error("Modify list item error: ", error);
     }
   };
-  const dragItem: MutableRefObject<Item> = useRef({} as Item);
-  const dragNode: MutableRefObject<Nullable<EventTarget>> = useRef(
-    {} as HTMLInputElement
-  );
-
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, item: Item) => {
-    setTimeout(() => {
-      setDragging(true);
-    }, 0);
-    dragItem.current = item;
-    dragNode.current = e.target;
-    dragNode.current.addEventListener("dragend", handleDragEnd);
-  };
-
-  const handleDragEnd = () => {
-    setDragging(false);
-    //@ts-ignore
-    dragNode.current.removeEventListener("dragend", handleDragEnd);
-    dragItem.current = {} as Item;
-    dragNode.current = null;
-  };
-
-  const handleDragEnter = (e: DragEvent<HTMLDivElement>, item: Item) => {
-    if (e.target !== dragNode.current) {
-      setLocalItems((oldItems) => {
-        const newItems: Item[] = JSON.parse(JSON.stringify(oldItems));
-        const currentItemIndex = localItems.findIndex(
-          (element) => element.id === dragItem.current.id
-        );
-        const dragItemIndex = localItems.findIndex(
-          (element) => element.id === item.id
-        );
-        newItems.splice(
-          dragItemIndex,
-          0,
-          newItems.splice(currentItemIndex, 1)[0]
-        );
-        dragItem.current = newItems[dragItemIndex];
-        return newItems;
-      });
-    }
-  };
 
   const _tempList = JSON.parse(JSON.stringify(localItems));
-  const lastUpdate = _tempList.sort((a: Item, b: Item) => b.updatedAt.localeCompare(a.updatedAt))[0]?.updatedAt;
+  const lastUpdate = _tempList.sort((a: Item, b: Item) =>
+    b.updatedAt.localeCompare(a.updatedAt)
+  )[0]?.updatedAt;
 
   const renderContent = () => {
     if (!sessionData?.id) {
@@ -157,27 +134,40 @@ export default function SessionList({
       );
     }
     return (
-      <>
-        <ListTitle updatedAt={lastUpdate} />
-        <div className="flex flex-col">
-          {localItems?.map((item: Item) => (
-            <ListItem
-              key={item.id}
-              data={item}
-              toggleCheck={toggleCheck}
-              handleDragStart={handleDragStart}
-              handleDragEnter={handleDragEnter}
-              dragging={dragging}
-              currentDragItem={dragItem}
-            />
-          ))}
-        </div>
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        <StrictModeDroppable droppableId="todos">
+          {(provided) => (
+            <section {...provided.droppableProps} ref={provided.innerRef}>
+              <ListTitle updatedAt={lastUpdate} />
+              <div className="flex flex-col">
+                {localItems?.map((item: Item, index) => (
+                  <Draggable key={item.id} draggableId={item.id} index={index}>
+                    {(provided) => (
+                      <article
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                      >
+                        <ListItem
+                          key={item.id}
+                          data={item}
+                          toggleCheck={toggleCheck}
+                        />
+                      </article>
+                    )}
+                  </Draggable>
+                ))}
+              </div>
+              {provided.placeholder}
+            </section>
+          )}
+        </StrictModeDroppable>
         <Input
           handleChange={setInputValue}
           handleSubmit={handleSubmit}
           value={inputValue}
         />
-      </>
+      </DragDropContext>
     );
   };
 

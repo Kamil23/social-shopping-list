@@ -14,11 +14,10 @@ export default async function getSession(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const { query } = req;
-  const queryParams = query.sessionId;
+  const { sessionId: id } = req.query;
   const sessionData = await prisma.session.findUnique({
     //@ts-ignore
-    where: { id: queryParams },
+    where: { id },
     include: {
       items: true,
     },
