@@ -20,9 +20,7 @@ export default async function updateSession(
   try {
     const now = new Date();
     const { sessionId: id } = req.query;
-    console.log("sessionid: ", id);
     const data = req.body;
-    console.log("session data to update: ", JSON.stringify(data));
     if (!id) {
       throw new Error("no session id");
     }
@@ -47,7 +45,7 @@ export default async function updateSession(
         },
       },
     });
-    
+
     res
       .status(201)
       .json({ code: 200, status: "Session updated successfully!" });
