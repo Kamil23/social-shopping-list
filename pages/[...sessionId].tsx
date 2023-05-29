@@ -10,9 +10,7 @@ import Input from "@/components/List/input";
 import {
   Dispatch,
   FormEvent,
-  MutableRefObject,
   SetStateAction,
-  useRef,
   useState,
 } from "react";
 import Empty from "@/components/Empty";
@@ -36,8 +34,6 @@ export default function SessionList({
   );
   const [isDragging, setIsDragging] = useState(false);
   const [draggableId, setDraggableId] = useState("");
-
-  const dragItem: MutableRefObject<Item> = useRef({} as Item);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,6 +86,11 @@ export default function SessionList({
     const tasks = [...localItems];
     const [reorderedItem] = tasks.splice(result.source.index, 1);
 
+    if (result.source.index === result.destination.index) {
+      setIsDragging(false);
+      return;
+    } 
+
     tasks.splice(result.destination.index, 0, reorderedItem);
 
     tasks.map((task, index) => (task.sortOrder = index + 1));
@@ -141,7 +142,7 @@ export default function SessionList({
   const _tempList = JSON.parse(JSON.stringify(localItems));
   const lastUpdate = _tempList.sort((a: Item, b: Item) =>
     b.updatedAt.localeCompare(a.updatedAt)
-  )[0]?.updatedAt;
+  )[0]?.updatedAt || sessionData.updatedAt;
 
   const renderContent = () => {
     if (!sessionData?.id) {

@@ -7,8 +7,8 @@ export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const handleCreateSession = async () => {
-    const sessionId = await createSession();
     setIsLoading(true);
+    const sessionId = await createSession();
     router.push(sessionId);
   };
   return (
