@@ -7,18 +7,14 @@ import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import {
-  Dispatch,
-  FormEvent,
-  SetStateAction,
-  useState,
-} from "react";
+import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
 import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
-import { updateSession } from "@/requests";
+import { deleteItem, updateSession } from "@/requests";
+import Line from "@/components/Line";
 
 export default function SessionList({
   sessionData,
@@ -83,22 +79,22 @@ export default function SessionList({
   const handleOnDragEnd = async (result: any) => {
     if (!result.destination) return;
 
-    const tasks = [...localItems];
-    const [reorderedItem] = tasks.splice(result.source.index, 1);
+    const list = [...localItems];
+    const [reorderedItem] = list.splice(result.source.index, 1);
 
     if (result.source.index === result.destination.index) {
       setIsDragging(false);
       return;
-    } 
+    }
 
-    tasks.splice(result.destination.index, 0, reorderedItem);
+    list.splice(result.destination.index, 0, reorderedItem);
 
-    tasks.map((task, index) => (task.sortOrder = index + 1));
+    list.map((task, index) => (task.sortOrder = index + 1));
 
-    setLocalItems(tasks.sort(sortByUpdatedAtAndIsDisabled));
+    setLocalItems(list.sort(sortByUpdatedAtAndIsDisabled));
     setIsDragging(false);
 
-    await updateSession(tasks, router.query.sessionId);
+    await updateSession(list, router.query.sessionId);
   };
 
   const toggleCheck = async (
@@ -140,9 +136,17 @@ export default function SessionList({
   };
 
   const _tempList = JSON.parse(JSON.stringify(localItems));
-  const lastUpdate = _tempList.sort((a: Item, b: Item) =>
-    b.updatedAt.localeCompare(a.updatedAt)
-  )[0]?.updatedAt || sessionData.updatedAt;
+  const lastUpdate =
+    _tempList.sort((a: Item, b: Item) =>
+      b.updatedAt.localeCompare(a.updatedAt)
+    )[0]?.updatedAt || sessionData?.updatedAt;
+
+  const handleDeleteItem = async (id: string) => {
+    const list = JSON.parse(JSON.stringify(localItems));
+    const updatedList = list.filter((item: Item) => (item.id !== id));
+    setLocalItems([...updatedList.sort(sortByUpdatedAtAndIsDisabled)]);
+    await deleteItem(id);
+  };
 
   const renderContent = () => {
     if (!sessionData?.id) {
@@ -163,19 +167,22 @@ export default function SessionList({
               <ListTitle updatedAt={lastUpdate} />
               <div className="flex flex-col">
                 {localItems?.map((item: Item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
+                  <Draggable draggableId={item.id} key={item.id} index={index}>
                     {(provided) => (
                       <article
+                        className="w-full"
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                         ref={provided.innerRef}
                       >
+                        <Line />
                         <ListItem
                           key={item.id}
                           data={item}
                           isDragging={isDragging}
                           draggableId={draggableId}
                           toggleCheck={toggleCheck}
+                          handleDelete={handleDeleteItem}
                         />
                       </article>
                     )}
