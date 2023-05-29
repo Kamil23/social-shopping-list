@@ -203,7 +203,7 @@ export default function SessionList({
   };
 
   return (
-    <Layout>
+    <Layout list={localItems}>
       <Head>
         <title>{`Lista zakupowa: ${router.query.sessionId}`}</title>
       </Head>
