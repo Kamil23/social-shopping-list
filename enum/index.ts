@@ -4,4 +4,5 @@ export enum APIUrl {
   UpdateSession = '/api/session/update',
   CreateItem = '/api/item/create',
   UpdateItem = '/api/item/update',
+  DeleteItem = '/api/item/delete',
 }

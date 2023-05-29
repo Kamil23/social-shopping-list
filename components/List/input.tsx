@@ -2,7 +2,7 @@ import { Dispatch, FormEvent, SetStateAction } from "react";
 
 export default function Input({ value, handleChange, handleSubmit }: { value: string, handleChange: Dispatch<SetStateAction<string>>, handleSubmit: (e: FormEvent<HTMLFormElement>) => void }) {
   return (
-    <form onSubmit={(e) => handleSubmit(e)} className="mt-8">
+    <form onSubmit={(e) => handleSubmit(e)} className="mt-2 p-4">
       <input
         type="input"
         value={value}

@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Dispatch, SetStateAction, useState } from "react";
 import { RiLoader5Fill } from "react-icons/ri";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { FiTrash } from "react-icons/fi";
 
 export default function ListItem({
   data,
@@ -10,6 +11,7 @@ export default function ListItem({
   isLoading,
   draggableId,
   toggleCheck,
+  handleDelete,
 }: {
   data: Item;
   isDragging: boolean;
@@ -21,16 +23,28 @@ export default function ListItem({
     setIsChecked: Dispatch<SetStateAction<boolean>>,
     setUpdateTime: Dispatch<SetStateAction<string>>
   ) => void;
+  handleDelete: (id: string) => void;
 }) {
   const { id, title, updatedAt, isDisabled } = data;
   const [isChecked, setIsChecked] = useState(isDisabled || false);
   const [updateTime, setUpdateTime] = useState(updatedAt);
 
+  const renderDate = (itemDateString: string) => {
+    const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+    const nowUnix = new Date().getTime();
+    const itemDateUnix = new Date(itemDateString).getTime();
+
+    if (nowUnix - itemDateUnix <= ONE_DAY_IN_MS) {
+      return new Date(updateTime).toLocaleTimeString().slice(0, -3);
+    }
+    return new Date(updateTime).toLocaleDateString();
+  };
+
   return (
     <div
-      className={`flex p-2 space-x-2 items-center text-slate-800 ${clsx({
+      className={`w-full flex p-2 space-x-2 items-center text-slate-800 ${clsx({
         ["line-through text-slate-400"]: isChecked,
-        ["bg-yellow-100 text-slate-300"]: isDragging && draggableId === id,
+        ["bg-yellow-300 text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
       <input
@@ -51,11 +65,14 @@ export default function ListItem({
         </div>
       </div>
 
-      <div className="flex h-0 items-baseline">
+      <div className="flex h-0 items-center">
         <div className="text-[8px]">
-          {new Date(updateTime).toLocaleTimeString()}
+          {renderDate(updatedAt)}
         </div>
       </div>
-    </div>
+      <button className="px-2" onClick={() => handleDelete(id)}>
+        <FiTrash className="text-xl" />
+      </button>
+      </div>
   );
 }

@@ -25,7 +25,7 @@ const Button = ({
       ></span>
 
       <span
-        className={`relative inline-block border-2 border-current px-8 py-3 text-sm font-bold uppercase tracking-widest text-black group-active:text-opacity-75 ${clsx(
+        className={`relative inline-block border-2 border-current px-8 py-3 text-xs font-bold uppercase tracking-widest text-black group-active:text-opacity-75 ${clsx(
           {
             ["text-slate-600"]: isLoading,
           }
