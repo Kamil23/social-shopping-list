@@ -1,5 +1,5 @@
 import ListItem from "@/components/List/item";
-import ListTitle from "@/components/List/title";
+import ListHeader from "@/components/List/header";
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
 import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
@@ -135,15 +135,9 @@ export default function SessionList({
     }
   };
 
-  const _tempList = JSON.parse(JSON.stringify(localItems));
-  const lastUpdate =
-    _tempList.sort((a: Item, b: Item) =>
-      b.updatedAt.localeCompare(a.updatedAt)
-    )[0]?.updatedAt || sessionData?.updatedAt;
-
   const handleDeleteItem = async (id: string) => {
     const list = JSON.parse(JSON.stringify(localItems));
-    const updatedList = list.filter((item: Item) => (item.id !== id));
+    const updatedList = list.filter((item: Item) => item.id !== id);
     setLocalItems([...updatedList.sort(sortByUpdatedAtAndIsDisabled)]);
     await deleteItem(id);
   };
@@ -157,48 +151,53 @@ export default function SessionList({
       );
     }
     return (
-      <DragDropContext
-        onDragEnd={handleOnDragEnd}
-        onDragStart={handleOnDragStart}
-      >
-        <StrictModeDroppable droppableId="list">
-          {(provided) => (
-            <section {...provided.droppableProps} ref={provided.innerRef}>
-              <ListTitle updatedAt={lastUpdate} />
-              <div className="flex flex-col">
-                {localItems?.map((item: Item, index) => (
-                  <Draggable draggableId={item.id} key={item.id} index={index}>
-                    {(provided) => (
-                      <article
-                        className="w-full"
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                      >
-                        <Line />
-                        <ListItem
-                          key={item.id}
-                          data={item}
-                          isDragging={isDragging}
-                          draggableId={draggableId}
-                          toggleCheck={toggleCheck}
-                          handleDelete={handleDeleteItem}
-                        />
-                      </article>
-                    )}
-                  </Draggable>
-                ))}
-              </div>
-              {provided.placeholder}
-            </section>
-          )}
-        </StrictModeDroppable>
+      <div className="pt-32 pb-20">
+        <DragDropContext
+          onDragEnd={handleOnDragEnd}
+          onDragStart={handleOnDragStart}
+        >
+          <StrictModeDroppable droppableId="list">
+            {(provided) => (
+              <section {...provided.droppableProps} ref={provided.innerRef}>
+                <div className="flex flex-col">
+                  {localItems?.map((item: Item, index) => (
+                    <Draggable
+                      draggableId={item.id}
+                      key={item.id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <article
+                          className="w-full"
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                        >
+                          <Line />
+                          <ListItem
+                            key={item.id}
+                            data={item}
+                            isDragging={isDragging}
+                            draggableId={draggableId}
+                            toggleCheck={toggleCheck}
+                            handleDelete={handleDeleteItem}
+                          />
+                        </article>
+                      )}
+                    </Draggable>
+                  ))}
+                </div>
+                {provided.placeholder}
+              </section>
+            )}
+          </StrictModeDroppable>
+        </DragDropContext>
         <Input
           handleChange={setInputValue}
           handleSubmit={handleSubmit}
           value={inputValue}
         />
-      </DragDropContext>
+      </div>
     );
   };
 
