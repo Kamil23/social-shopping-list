@@ -1,18 +1,15 @@
+import { formatDate } from "@/helpers";
 import { Item } from "@/types/sessionList";
 import clsx from "clsx";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FiTrash } from "react-icons/fi";
 
 export default function ListItem({
   data,
-  isDragging,
-  draggableId,
   toggleCheck,
   handleDelete,
 }: {
   data: Item;
-  isDragging: boolean;
-  draggableId: string;
   toggleCheck: (
     id: string,
     isChecked: boolean,
@@ -25,22 +22,14 @@ export default function ListItem({
   const [isChecked, setIsChecked] = useState(isDisabled || false);
   const [updateTime, setUpdateTime] = useState(updatedAt);
 
-  const renderDate = (itemDateString: string) => {
-    const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-    const nowUnix = new Date().getTime();
-    const itemDateUnix = new Date(itemDateString).getTime();
-
-    if (nowUnix - itemDateUnix <= ONE_DAY_IN_MS) {
-      return new Date(updateTime).toLocaleTimeString().slice(0, -3);
-    }
-    return new Date(updateTime).toLocaleDateString();
-  };
+  useEffect(() => {
+    setUpdateTime(formatDate(updatedAt));
+  }, [updatedAt]);
 
   return (
     <div
       className={`w-full flex p-2 space-x-2 items-center text-slate-800 ${clsx({
         ["line-through text-slate-400"]: isChecked,
-        ["bg-yellow-300 text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
       <input
@@ -55,7 +44,7 @@ export default function ListItem({
 
       <div className="flex h-0 items-end">
         <div className="text-[8px]">
-          {renderDate(updatedAt)}
+          {updateTime}
         </div>
       </div>
       <button className="px-2" onClick={() => handleDelete(id)}>

@@ -1,5 +1,4 @@
 import ListItem from "@/components/List/item";
-import ListHeader from "@/components/List/header";
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { prisma } from "@/lib/prisma";
@@ -7,29 +6,32 @@ import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useContext, useEffect, useState } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
 import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
-import { DragDropContext, Draggable } from "react-beautiful-dnd";
-import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
-import { deleteItem, updateSession } from "@/requests";
+import { deleteItem } from "@/requests";
 import Line from "@/components/Line";
+import useList from "@/hooks/useList";
 
 export default function SessionList({
   sessionData,
 }: {
   sessionData: SessionData;
 }) {
+  const { saveData } = useList();
   const now = new Date();
   const router = useRouter();
   const { items } = sessionData || {};
+
   const [inputValue, setInputValue] = useState("");
   const [localItems, setLocalItems] = useState(
     items?.sort(sortByUpdatedAtAndIsDisabled) || []
   );
-  const [isDragging, setIsDragging] = useState(false);
-  const [draggableId, setDraggableId] = useState("");
+
+  useEffect(() => {
+    saveData(sessionData);
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,39 +64,6 @@ export default function SessionList({
     } catch (error) {
       console.error("Create item error: ", error);
     }
-  };
-
-  interface DraggableData {
-    draggableId: string;
-    mode: string;
-    source: {};
-    type: string;
-  }
-
-  const handleOnDragStart = async (result: DraggableData) => {
-    setIsDragging(true);
-    setDraggableId(result.draggableId);
-  };
-
-  const handleOnDragEnd = async (result: any) => {
-    if (!result.destination) return;
-
-    const list = [...localItems];
-    const [reorderedItem] = list.splice(result.source.index, 1);
-
-    if (result.source.index === result.destination.index) {
-      setIsDragging(false);
-      return;
-    }
-
-    list.splice(result.destination.index, 0, reorderedItem);
-
-    list.map((task, index) => (task.sortOrder = index + 1));
-
-    setLocalItems(list.sort(sortByUpdatedAtAndIsDisabled));
-    setIsDragging(false);
-
-    await updateSession(list, router.query.sessionId);
   };
 
   const toggleCheck = async (
@@ -152,46 +121,20 @@ export default function SessionList({
     }
     return (
       <div className="pt-32 pb-20">
-        <DragDropContext
-          onDragEnd={handleOnDragEnd}
-          onDragStart={handleOnDragStart}
-        >
-          <StrictModeDroppable droppableId="list">
-            {(provided) => (
-              <section {...provided.droppableProps} ref={provided.innerRef}>
-                <div className="flex flex-col">
-                  {localItems?.map((item: Item, index) => (
-                    <Draggable
-                      draggableId={item.id}
-                      key={item.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <article
-                          className="w-full"
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                        >
-                          <Line />
-                          <ListItem
-                            key={item.id}
-                            data={item}
-                            isDragging={isDragging}
-                            draggableId={draggableId}
-                            toggleCheck={toggleCheck}
-                            handleDelete={handleDeleteItem}
-                          />
-                        </article>
-                      )}
-                    </Draggable>
-                  ))}
-                </div>
-                {provided.placeholder}
-              </section>
-            )}
-          </StrictModeDroppable>
-        </DragDropContext>
+        <div className="flex flex-col">
+          {localItems?.map((item: Item) => (
+            <div key={item.id}>
+              <Line />
+              <ListItem
+                key={item.id}
+                data={item}
+                toggleCheck={toggleCheck}
+                handleDelete={handleDeleteItem}
+              />
+            </div>
+          ))}
+        </div>
+
         <Input
           handleChange={setInputValue}
           handleSubmit={handleSubmit}
@@ -202,7 +145,7 @@ export default function SessionList({
   };
 
   return (
-    <Layout list={localItems}>
+    <Layout>
       <Head>
         <title>{`Lista zakupowa: ${router.query.sessionId}`}</title>
       </Head>
@@ -212,11 +155,10 @@ export default function SessionList({
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  //@ts-ignore
-  const { sessionId } = context.params;
+  const { sessionId } = context.params || {};
   try {
     const sessionData = await prisma.session.findUnique({
-      where: { id: sessionId[0] },
+      where: { id: sessionId?.[0] },
       include: {
         items: true,
       },
