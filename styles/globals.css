@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.swipeable-list-item__trailing-actions {
+  background: #f00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}

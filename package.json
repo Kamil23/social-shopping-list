@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/react-beautiful-dnd": "^13.1.4",
-    "prisma": "^4.14.1"
+    "prisma": "^4.14.1",
+    "react-icons": "^4.9.0"
   }
 }
