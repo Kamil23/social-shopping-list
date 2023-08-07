@@ -47,7 +47,7 @@ export default async function updateSession(
     });
 
     res
-      .status(201)
+      .status(200)
       .json({ code: 200, status: "Session updated successfully!" });
   } catch (error) {
     console.error(error);

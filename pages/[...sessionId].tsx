@@ -15,7 +15,7 @@ import {
 } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
-import { sortByUpdatedAtAndIsDisabled } from "@/helpers";
+import { sortBySortOrder } from "@/helpers";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { updateSession } from "@/requests";
@@ -30,9 +30,10 @@ export default function SessionList({
   const { items } = sessionData || {};
   const [inputValue, setInputValue] = useState("");
   const [localItems, setLocalItems] = useState(
-    items?.sort(sortByUpdatedAtAndIsDisabled) || []
+    items?.sort(sortBySortOrder) || []
   );
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [draggableId, setDraggableId] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -50,7 +51,7 @@ export default function SessionList({
       };
 
       setLocalItems(
-        [...localItems, submittedData].sort(sortByUpdatedAtAndIsDisabled)
+        [...localItems, submittedData].sort(sortBySortOrder)
       );
       setInputValue("");
 
@@ -89,16 +90,21 @@ export default function SessionList({
     if (result.source.index === result.destination.index) {
       setIsDragging(false);
       return;
-    } 
+    }
+
+    setIsLoading(true);
 
     tasks.splice(result.destination.index, 0, reorderedItem);
 
     tasks.map((task, index) => (task.sortOrder = index + 1));
 
-    setLocalItems(tasks.sort(sortByUpdatedAtAndIsDisabled));
+    setLocalItems(tasks.sort(sortBySortOrder));
     setIsDragging(false);
 
+
     await updateSession(tasks, router.query.sessionId);
+    setIsLoading(false);
+    setIsDragging(false);
   };
 
   const toggleCheck = async (
@@ -122,7 +128,7 @@ export default function SessionList({
       );
       localItems[indexOfSelectedItem].updatedAt = now;
       localItems[indexOfSelectedItem].isDisabled = !isChecked;
-      const sortedItems = localItems.sort(sortByUpdatedAtAndIsDisabled);
+      const sortedItems = localItems.sort(sortBySortOrder);
       setLocalItems([...sortedItems]);
 
       const JSONdata = JSON.stringify(modifiedData);
@@ -174,6 +180,7 @@ export default function SessionList({
                           key={item.id}
                           data={item}
                           isDragging={isDragging}
+                          isLoading={isLoading}
                           draggableId={draggableId}
                           toggleCheck={toggleCheck}
                         />

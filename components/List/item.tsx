@@ -1,16 +1,19 @@
 import { Item } from "@/types/sessionList";
 import clsx from "clsx";
 import { Dispatch, SetStateAction, useState } from "react";
+import { RiLoader5Fill } from "react-icons/ri";
 import { RxDragHandleDots2 } from "react-icons/rx";
 
 export default function ListItem({
   data,
   isDragging,
+  isLoading,
   draggableId,
   toggleCheck,
 }: {
   data: Item;
   isDragging: boolean;
+  isLoading: boolean;
   draggableId: string;
   toggleCheck: (
     id: string,
@@ -38,12 +41,21 @@ export default function ListItem({
       />
       <div className="flex w-full justify-between items-center">
         <div>{title}</div>
-        <RxDragHandleDots2 className="mr-4 text-xl" />
+        <div className="flex relative">
+          <RxDragHandleDots2 className="mr-4 text-xl" />
+          {isLoading && draggableId === id ? (
+            <RiLoader5Fill
+              className={`animate-spin text-xs absolute right-0`}
+            />
+          ) : null}
+        </div>
       </div>
 
-      {/* <div className="flex h-0 items-baseline">
-        <div className="text-[8px]">{new Date(updateTime).toLocaleDateString()}</div>
-      </div> */}
+      <div className="flex h-0 items-baseline">
+        <div className="text-[8px]">
+          {new Date(updateTime).toLocaleTimeString()}
+        </div>
+      </div>
     </div>
   );
 }

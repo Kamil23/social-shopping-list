@@ -1,7 +1,10 @@
 import { Item } from "@/types/sessionList";
 
-export const sortByUpdatedAtAndIsDisabled = (a: Item, b: Item) => {
-  // @ts-ignore
+export const sortBySortOrder = (a: Item, b: Item) => {
+  //@ts-ignore
   const isDisabledComparison = a.isDisabled - b.isDisabled;
+  if (isDisabledComparison === 0) {
+    return a.sortOrder - b.sortOrder;
+  }
   return isDisabledComparison;
 };
