@@ -10,7 +10,7 @@ import Input from "@/components/List/input";
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
-import { sortBySortOrder } from "@/helpers";
+import { scrollToBottomWithKeyboardAdjustment, sortBySortOrder } from "@/helpers";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { deleteItem, updateSession } from "@/requests";
@@ -46,11 +46,21 @@ export default function SessionList({
         sortOrder: itemsLength + 1,
       };
 
+      const section = document.getElementsByTagName("section")[0];
+      const keyboardHeight = 250;
+      const formHeight = document.getElementsByTagName("form")[0].clientHeight;
+      console.log(section.clientHeight, document.documentElement.scrollHeight - keyboardHeight - formHeight);
+      if (section.clientHeight >= document.documentElement.scrollHeight - keyboardHeight - formHeight) {
+        setTimeout(function() {
+          scrollToBottomWithKeyboardAdjustment();
+        }, 100);
+      }
+
       setLocalItems(
         [...localItems, submittedData].sort(sortBySortOrder)
       );
       setInputValue("");
-      window.scrollTo(0, document.body.scrollHeight);
+
 
       const JSONdata = JSON.stringify(submittedData);
       const options = {
