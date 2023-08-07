@@ -50,6 +50,7 @@ export default function SessionList({
         [...localItems, submittedData].sort(sortBySortOrder)
       );
       setInputValue("");
+      window.scrollTo(0, document.body.scrollHeight);
 
       const JSONdata = JSON.stringify(submittedData);
       const options = {
