@@ -20,4 +20,26 @@ export const scrollToBottomWithKeyboardAdjustment = () => {
     top: adjustedScrollTop - window.scrollY,
     behavior: "smooth",
   });
-}
+};
+
+export const convertBlobToJSON = async (blob: Blob) => {
+  try {
+      // Convert the Blob to JSON
+      const jsonString = await blobToString(blob) as string;
+      const jsonData = JSON.parse(jsonString);
+      return jsonData;
+  } catch (error) {
+      console.error('Error parsing received JSON:', error);
+  }
+};
+
+const blobToString = (blob: Blob): Promise<string | ArrayBuffer | null> => {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+          resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsText(blob);
+  });
+};

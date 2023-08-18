@@ -7,14 +7,27 @@ import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import { Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
-import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  MutableRefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Empty from "@/components/Empty";
 import { APIUrl } from "@/enum";
-import { scrollToBottomWithKeyboardAdjustment, sortBySortOrder } from "@/helpers";
+import {
+  convertBlobToJSON,
+  scrollToBottomWithKeyboardAdjustment,
+  sortBySortOrder,
+} from "@/helpers";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { deleteItem, updateSession } from "@/requests";
 import Line from "@/components/Line";
+import ActiveConnections from "@/components/ActiveConnections";
 
 export default function SessionList({
   sessionData,
@@ -31,6 +44,67 @@ export default function SessionList({
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [draggableId, setDraggableId] = useState("");
+
+  /** WEBSOCKET */
+  const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
+  if (!wsRef.current) {
+    setIsLoading(true);
+    wsRef.current = new WebSocket(`ws://localhost:8080/${sessionData.id}`);
+    debugger;
+
+    wsRef.current.onopen = (event) => {};
+
+    wsRef.current.onerror = (event) => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }
+
+  const messagesRef: MutableRefObject<any> = useRef();
+  if (!messagesRef.current) {
+    messagesRef.current = items?.sort(sortBySortOrder);
+  }
+
+  useEffect(() => {
+    if (wsRef.current) {
+      wsRef.current.onmessage = async (event) => {
+        if (typeof event.data === "string") {
+          return;
+        }
+        const json = await convertBlobToJSON(event.data);
+        const {
+          id,
+          title,
+          createdAt,
+          updatedAt,
+          sessionId,
+          isDisabled,
+          sortOrder,
+        } = json || undefined;
+        debugger;
+        try {
+          if (typeof json === "object") {
+            const obj = {
+              id,
+              title,
+              createdAt,
+              updatedAt,
+              sessionId,
+              isDisabled,
+              sortOrder,
+            };
+            messagesRef.current = [...messagesRef.current, obj].sort(
+              sortBySortOrder
+            );
+            setLocalItems(messagesRef.current);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,18 +123,17 @@ export default function SessionList({
       const section = document.getElementsByTagName("section")[0];
       const keyboardHeight = 250;
       const formHeight = document.getElementsByTagName("form")[0].clientHeight;
-      console.log(section.clientHeight, document.documentElement.scrollHeight - keyboardHeight - formHeight);
-      if (section.clientHeight >= document.documentElement.scrollHeight - keyboardHeight - formHeight) {
-        setTimeout(function() {
+      if (
+        section.clientHeight >=
+        document.documentElement.scrollHeight - keyboardHeight - formHeight
+      ) {
+        setTimeout(function () {
           scrollToBottomWithKeyboardAdjustment();
         }, 100);
       }
 
-      setLocalItems(
-        [...localItems, submittedData].sort(sortBySortOrder)
-      );
+      setLocalItems([...localItems, submittedData].sort(sortBySortOrder));
       setInputValue("");
-
 
       const JSONdata = JSON.stringify(submittedData);
       const options = {
@@ -71,6 +144,10 @@ export default function SessionList({
         body: JSONdata,
       };
       await fetch(APIUrl.CreateItem, options);
+
+      if (wsRef.current) {
+        wsRef.current.send(JSONdata);
+      }
     } catch (error) {
       console.error("Create item error: ", error);
     }
@@ -107,7 +184,6 @@ export default function SessionList({
 
     setLocalItems(list.sort(sortBySortOrder));
     setIsDragging(false);
-
 
     await updateSession(list, router.query.sessionId);
     setIsLoading(false);
@@ -160,7 +236,7 @@ export default function SessionList({
 
   const handleDeleteItem = async (id: string) => {
     const list = JSON.parse(JSON.stringify(localItems));
-    const updatedList = list.filter((item: Item) => (item.id !== id));
+    const updatedList = list.filter((item: Item) => item.id !== id);
     setLocalItems([...updatedList.sort(sortBySortOrder)]);
     await deleteItem(id);
   };
