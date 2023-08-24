@@ -26,8 +26,6 @@ import {
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { deleteItem, updateSession } from "@/requests";
-import Line from "@/components/Line";
-import ActiveConnections from "@/components/ActiveConnections";
 
 export default function SessionList({
   sessionData,
@@ -47,10 +45,9 @@ export default function SessionList({
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
-  if (!wsRef.current) {
+  if (!wsRef.current && sessionData?.id) {
     setIsLoading(true);
-    wsRef.current = new WebSocket(`ws://localhost:8080/${sessionData.id}`);
-    debugger;
+    wsRef.current = new WebSocket(`wss://ws.freshlist.pl/${sessionData.id}`);
 
     wsRef.current.onopen = (event) => {};
 
@@ -268,7 +265,6 @@ export default function SessionList({
                         {...provided.dragHandleProps}
                         ref={provided.innerRef}
                       >
-                        <Line />
                         <ListItem
                           key={item.id}
                           data={item}

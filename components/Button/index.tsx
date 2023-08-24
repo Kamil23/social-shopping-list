@@ -10,7 +10,7 @@ const Button = ({
   handler?: () => void;
   isLoading?: boolean;
 }) => (
-  <div className="flex flex-col space-y-8 justify-center items-center relative">
+  <div className="flex flex-1 flex-col space-y-8 justify-center items-center relative">
     <button
       disabled={isLoading}
       onClick={handler}

@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { RiLoader5Fill } from "react-icons/ri";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { FiTrash } from "react-icons/fi";
+import Checkbox from "../Checkbox";
 
 export default function ListItem({
   data,
@@ -47,14 +48,9 @@ export default function ListItem({
         ["bg-yellow-300 text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
-      <input
-        type="checkbox"
-        className="w-6 h-6"
-        checked={isChecked}
-        onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)}
-      />
+      <Checkbox isChecked={isChecked} isDisabled={false} onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)} id={id}/>
       <div className="flex w-full justify-between items-center">
-        <div>{title}</div>
+        <div className="ml-4">{title}</div>
         <div className="flex relative">
           <RxDragHandleDots2 className="mr-4 text-xl" />
           {isLoading && draggableId === id ? (

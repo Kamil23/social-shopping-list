@@ -5,6 +5,8 @@ CREATE TABLE "Item" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "sessionId" TEXT,
+    "isDisabled" BOOLEAN NOT NULL DEFAULT false,
+    "sortOrder" INTEGER NOT NULL,
 
     CONSTRAINT "Item_pkey" PRIMARY KEY ("id")
 );
