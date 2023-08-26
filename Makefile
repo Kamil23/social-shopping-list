@@ -1,4 +1,5 @@
 deploy-prod:
+	rm -rf .next/
 	npm run build
 	mkdir -p dist
 	cp -r .next dist/
@@ -12,7 +13,6 @@ deploy-prod:
 	cp -r requests dist/
 	cp -r styles dist/
 	cp -r types dist/
-	cp -r utils dist/
 	cp .eslintrc.json dist/
 	cp next-env.d.ts dist/
 	cp next.config.js dist/
@@ -22,4 +22,5 @@ deploy-prod:
 	cp tailwind.config.js dist/
 	cp tsconfig.json dist/
 	scp -r dist/* miservice@s56.mydevil.net:domains/freshlist.pl/public_nodejs
+	scp -r dist/.next/* miservice@s56.mydevil.net:domains/freshlist.pl/public_nodejs/.next
 	ssh miservice@s56.mydevil.net
