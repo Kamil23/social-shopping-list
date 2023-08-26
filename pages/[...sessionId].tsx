@@ -29,8 +29,10 @@ import { deleteItem, updateSession } from "@/requests";
 
 export default function SessionList({
   sessionData,
+  websocketUrl,
 }: {
   sessionData: SessionData;
+  websocketUrl: string;
 }) {
   const now = new Date();
   const router = useRouter();
@@ -47,7 +49,7 @@ export default function SessionList({
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
   if (!wsRef.current && sessionData?.id) {
     setIsLoading(true);
-    wsRef.current = new WebSocket(`ws://localhost:8080/${sessionData.id}`);
+    wsRef.current = new WebSocket(`${websocketUrl}/${sessionData.id}`);
 
     wsRef.current.onopen = (event) => {};
 
@@ -315,6 +317,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         sessionData: JSON.parse(JSON.stringify(sessionData)),
+        websocketUrl: process.env.WEBSOCKET_URL
       },
     };
   } catch (error) {

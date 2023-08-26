@@ -1,3 +1,4 @@
+import AppVersion from "@/components/AppVersion";
 import Button from "@/components/Button";
 import { createSession } from "@/requests";
 import { useRouter } from "next/router";
@@ -12,8 +13,13 @@ export default function Home() {
     router.push(sessionId);
   };
   return (
+    <div>
     <main className="w-full h-[100vh] flex justify-center items-center">
       <Button title="Stwórz nową listę" handler={handleCreateSession} isLoading={isLoading} />
     </main>
+    <aside className="absolute bottom-0 right-0">
+      <AppVersion />
+    </aside>
+    </div>
   )
 }
