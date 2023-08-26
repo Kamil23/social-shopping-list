@@ -81,7 +81,6 @@ export default function SessionList({
           isDisabled,
           sortOrder,
         } = json || undefined;
-        debugger;
         try {
           if (typeof json === "object") {
             const obj = {

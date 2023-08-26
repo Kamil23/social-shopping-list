@@ -29,11 +29,11 @@ export default function Input({
       <Checkbox isChecked={false} isDisabled />
       <input
         ref={inputRef}
-        type="input"
+        type="text"
         value={value}
-        // placeholder="Dodaj coś do listy..."
         onChange={(e) => handleChange(e.target.value)}
         className="ml-4 w-full px-2 border-none focus:outline-none placeholder-gray-400 text-slate-800"
+        enterKeyHint="next"
       />
       <label></label>
     </form>

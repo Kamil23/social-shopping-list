@@ -17,7 +17,7 @@ export default function Home() {
     <main className="w-full h-[100vh] flex justify-center items-center">
       <Button title="Stwórz nową listę" handler={handleCreateSession} isLoading={isLoading} />
     </main>
-    <aside className="absolute bottom-0 right-0">
+    <aside className="absolute bottom-0 right-0 mb-1 mr-1">
       <AppVersion />
     </aside>
     </div>
