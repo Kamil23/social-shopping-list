@@ -12,7 +12,7 @@ export default function ListTitle({ updatedAt }: { updatedAt: string }) {
   const date = new Date(updatedAt);
   return (
     <div className="flex flex-col space-y-1 mb-4 p-4">
-      <div className="whitespace-nowrap overflow-hidden text-ellipsis">{`Lista zakupowa: ${router.query.sessionId}`}</div>
+      <div className="whitespace-nowrap overflow-hidden text-ellipsis">{`Lista: ${router.query.sessionId}`}</div>
       <div className="flex space-x-2 items-center">
         <div className="text-xs flex-1">{`Ostatnia zmiana: ${date.toLocaleDateString()} ${
           date.toLocaleTimeString() || "Brak"

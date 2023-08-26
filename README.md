@@ -22,17 +22,27 @@ The `pages/api` directory is mapped to `/api/*`. Files in this directory are tre
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+## Deployment
+This app is hosted by **mydevil.net**
 
-To learn more about Next.js, take a look at the following resources:
+> You will need password for hosting account only
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Run command:
+```
+  make deploy-prod
+```
+This copy newest files to storage on mydevil. You will have to specify the password to hosting account.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Above command run ssh shell. You have to restart nodeJS app by command:
 
-## Deploy on Vercel
+```
+  devil www restart freshlist.pl
+```
+3. Then you can exit from ssh by command:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+  exit
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+****
+Done.

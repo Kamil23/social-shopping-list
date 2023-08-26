@@ -21,6 +21,7 @@ export default function Input({
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
+      inputRef.current.setSelectionRange(0, 999);
     }
   }, []);
   return (

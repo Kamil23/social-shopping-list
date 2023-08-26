@@ -47,7 +47,7 @@ export default function SessionList({
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
   if (!wsRef.current && sessionData?.id) {
     setIsLoading(true);
-    wsRef.current = new WebSocket(`wss://ws.freshlist.pl/${sessionData.id}`);
+    wsRef.current = new WebSocket(`ws://localhost:8080/${sessionData.id}`);
 
     wsRef.current.onopen = (event) => {};
 
