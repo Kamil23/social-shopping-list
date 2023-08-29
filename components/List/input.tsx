@@ -32,7 +32,8 @@ export default function Input({
         type="text"
         value={value}
         onChange={(e) => handleChange(e.target.value)}
-        className="ml-4 w-full px-2 border-none focus:outline-none placeholder-gray-400 text-slate-800"
+        placeholder="Dodaj nowy element..."
+        className="ml-4 w-full px-2 border-none focus:outline-none placeholder-gray-300 text-slate-800"
         enterKeyHint="next"
       />
       <label></label>

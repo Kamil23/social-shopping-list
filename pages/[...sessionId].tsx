@@ -12,13 +12,15 @@ import {
   FormEvent,
   MutableRefObject,
   SetStateAction,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
 import Empty from "@/components/Empty";
-import { APIUrl } from "@/enum";
+import { APIUrl, WebsocketMessageType } from "@/enum";
 import {
+  constructPayload,
   convertBlobToJSON,
   scrollToBottomWithKeyboardAdjustment,
   sortBySortOrder,
@@ -60,11 +62,6 @@ export default function SessionList({
     };
   }
 
-  const messagesRef: MutableRefObject<any> = useRef();
-  if (!messagesRef.current) {
-    messagesRef.current = items?.sort(sortBySortOrder);
-  }
-
   useEffect(() => {
     if (wsRef.current) {
       wsRef.current.onmessage = async (event) => {
@@ -72,18 +69,11 @@ export default function SessionList({
           return;
         }
         const json = await convertBlobToJSON(event.data);
-        const {
-          id,
-          title,
-          createdAt,
-          updatedAt,
-          sessionId,
-          isDisabled,
-          sortOrder,
-        } = json || undefined;
-        try {
-          if (typeof json === "object") {
-            const obj = {
+        const { type, data } = json;
+
+        switch (type) {
+          case WebsocketMessageType.CREATE:
+            const {
               id,
               title,
               createdAt,
@@ -91,18 +81,51 @@ export default function SessionList({
               sessionId,
               isDisabled,
               sortOrder,
-            };
-            messagesRef.current = [...messagesRef.current, obj].sort(
-              sortBySortOrder
+            } = data || undefined;
+            try {
+              if (typeof json === "object") {
+                const obj = {
+                  id,
+                  title,
+                  createdAt,
+                  updatedAt,
+                  sessionId,
+                  isDisabled,
+                  sortOrder,
+                };
+                setLocalItems([...localItems, obj].sort(sortBySortOrder));
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            break;
+          case WebsocketMessageType.UPDATE:
+            alert("update");
+            break;
+          case WebsocketMessageType.DELETE:
+            const filteredItems = localItems.filter(
+              (item) => item.id !== data.id
             );
-            setLocalItems(messagesRef.current);
-          }
-        } catch (err) {
-          console.error(err);
+            setLocalItems([...filteredItems]);
+            break;
+          case WebsocketMessageType.TOGGLE_CHECK:
+            const indexOfSelectedItem = localItems.findIndex(
+              (item) => item.id === data.id
+            );
+            localItems[indexOfSelectedItem].updatedAt = data.updatedAt;
+            localItems[indexOfSelectedItem].isDisabled = data.isDisabled;
+            const sortedItems = localItems.sort(sortBySortOrder);
+            setLocalItems([...sortedItems]);
+            break;
+          case WebsocketMessageType.POSITION_CHANGE:
+            setLocalItems([...data]);
+            break;
+          default:
+            break;
         }
       };
     }
-  }, []);
+  }, [localItems]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -129,8 +152,6 @@ export default function SessionList({
           scrollToBottomWithKeyboardAdjustment();
         }, 100);
       }
-
-      setLocalItems([...localItems, submittedData].sort(sortBySortOrder));
       setInputValue("");
 
       const JSONdata = JSON.stringify(submittedData);
@@ -144,7 +165,9 @@ export default function SessionList({
       await fetch(APIUrl.CreateItem, options);
 
       if (wsRef.current) {
-        wsRef.current.send(JSONdata);
+        wsRef.current.send(
+          constructPayload(WebsocketMessageType.CREATE, submittedData)
+        );
       }
     } catch (error) {
       console.error("Create item error: ", error);
@@ -186,6 +209,11 @@ export default function SessionList({
     await updateSession(list, router.query.sessionId);
     setIsLoading(false);
     setIsDragging(false);
+    if (wsRef.current) {
+      wsRef.current.send(
+        constructPayload(WebsocketMessageType.POSITION_CHANGE, list)
+      );
+    }
   };
 
   const toggleCheck = async (
@@ -221,6 +249,9 @@ export default function SessionList({
         body: JSONdata,
       };
       await fetch(APIUrl.UpdateItem, options);
+      if (wsRef.current) {
+        wsRef.current.send(constructPayload(WebsocketMessageType.TOGGLE_CHECK, modifiedData));
+      }
     } catch (error) {
       console.error("Modify list item error: ", error);
     }
@@ -237,6 +268,9 @@ export default function SessionList({
     const updatedList = list.filter((item: Item) => item.id !== id);
     setLocalItems([...updatedList.sort(sortBySortOrder)]);
     await deleteItem(id);
+    if (wsRef.current) {
+      wsRef.current.send(constructPayload(WebsocketMessageType.DELETE, { id }));
+    }
   };
 
   const renderContent = () => {
@@ -316,7 +350,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         sessionData: JSON.parse(JSON.stringify(sessionData)),
-        websocketUrl: process.env.WEBSOCKET_URL
+        websocketUrl: process.env.WEBSOCKET_URL,
       },
     };
   } catch (error) {

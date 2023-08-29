@@ -1,6 +1,6 @@
 import { Item } from "@/types/sessionList";
 import clsx from "clsx";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { RiLoader5Fill } from "react-icons/ri";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { FiTrash } from "react-icons/fi";
@@ -41,6 +41,10 @@ export default function ListItem({
     return new Date(updateTime).toLocaleDateString();
   };
 
+  useEffect(() => {
+    setIsChecked(isDisabled);
+    setUpdateTime(updatedAt);
+  }, [isDisabled, updatedAt]);
   return (
     <div
       className={`w-full flex p-2 space-x-2 items-center text-slate-800 ${clsx({

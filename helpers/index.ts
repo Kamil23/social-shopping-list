@@ -1,3 +1,4 @@
+import { WebsocketMessageType } from "@/enum";
 import { Item } from "@/types/sessionList";
 
 export const sortBySortOrder = (a: Item, b: Item) => {
@@ -24,7 +25,6 @@ export const scrollToBottomWithKeyboardAdjustment = () => {
 
 export const convertBlobToJSON = async (blob: Blob) => {
   try {
-      // Convert the Blob to JSON
       const jsonString = await blobToString(blob) as string;
       const jsonData = JSON.parse(jsonString);
       return jsonData;
@@ -43,3 +43,10 @@ const blobToString = (blob: Blob): Promise<string | ArrayBuffer | null> => {
       reader.readAsText(blob);
   });
 };
+
+export function constructPayload<T>(type: WebsocketMessageType, data: T) {
+  return JSON.stringify({
+      type,
+      data,
+  });
+}
