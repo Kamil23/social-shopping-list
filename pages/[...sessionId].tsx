@@ -12,7 +12,6 @@ import {
   FormEvent,
   MutableRefObject,
   SetStateAction,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -93,7 +92,10 @@ export default function SessionList({
                   isDisabled,
                   sortOrder,
                 };
-                setLocalItems([...localItems, obj].sort(sortBySortOrder));
+                const shouldUpdate = !localItems.find(
+                  (item) => item.id === obj.id
+                );
+                shouldUpdate && setLocalItems([...localItems, obj].sort(sortBySortOrder));
               }
             } catch (err) {
               console.error(err);
@@ -163,6 +165,8 @@ export default function SessionList({
         body: JSONdata,
       };
       await fetch(APIUrl.CreateItem, options);
+
+      setLocalItems([...localItems, submittedData].sort(sortBySortOrder));
 
       if (wsRef.current) {
         wsRef.current.send(
