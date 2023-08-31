@@ -45,29 +45,37 @@ export default function SessionList({
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [draggableId, setDraggableId] = useState("");
+  const [connectionCount, setConnectionCount] = useState(0);
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
-  if (!wsRef.current && sessionData?.id) {
-    setIsLoading(true);
-    wsRef.current = new WebSocket(`${websocketUrl}/${sessionData.id}`);
 
-    wsRef.current.onopen = (event) => {};
+  useEffect(() => {
+    if (sessionData?.id && !wsRef.current) {
+      wsRef.current = new WebSocket(`${websocketUrl}/${sessionData.id}`);
 
-    wsRef.current.onerror = (event) => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-    };
-  }
+      wsRef.current.onopen = (event) => {
+        // WebSocket opened
+      };
+
+      wsRef.current.onerror = (event) => {
+        if (wsRef.current) {
+          wsRef.current.close();
+        }
+      };
+    }
+  }, [sessionData, websocketUrl]);
 
   useEffect(() => {
     if (wsRef.current) {
       wsRef.current.onmessage = async (event) => {
+        let json;
         if (typeof event.data === "string") {
-          return;
+          json = JSON.parse(event.data);
+        } else {
+          json = await convertBlobToJSON(event.data);
         }
-        const json = await convertBlobToJSON(event.data);
+        
         const { type, data } = json;
 
         switch (type) {
@@ -121,6 +129,9 @@ export default function SessionList({
             break;
           case WebsocketMessageType.POSITION_CHANGE:
             setLocalItems([...data]);
+            break;
+          case WebsocketMessageType.CONNECTION_COUNT:
+            setConnectionCount(data);
             break;
           default:
             break;
@@ -293,7 +304,7 @@ export default function SessionList({
         <StrictModeDroppable droppableId="list">
           {(provided) => (
             <section {...provided.droppableProps} ref={provided.innerRef}>
-              <ListTitle updatedAt={lastUpdate} />
+              <ListTitle updatedAt={lastUpdate} connectionCount={connectionCount} />
               <div className="flex flex-col">
                 {localItems?.map((item: Item, index) => (
                   <Draggable draggableId={item.id} key={item.id} index={index}>

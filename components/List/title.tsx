@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import Button from "../Button";
 import { useState } from "react";
 
-export default function ListTitle({ updatedAt }: { updatedAt: string }) {
+export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: string, connectionCount: number }) {
   const router = useRouter();
   const [isCopied, setIsCopied] = useState(false);
   const handleCopyLink = () => {
@@ -22,6 +22,18 @@ export default function ListTitle({ updatedAt }: { updatedAt: string }) {
           handler={handleCopyLink}
         />
       </div>
+      <div className="flex">{
+        connectionCount > 0 ? (
+          <div className="flex items-center space-x-1">
+          <div className="text-xs flex flex-1">Liczba osób online</div>
+          {
+            Array.from(Array(connectionCount)).map((_, index) => (
+              <div key={index} className="w-2 h-2 bg-green-500 rounded-full animate-smoothShow"></div>
+            ))
+          }
+          </div>
+        ) : null
+      }</div>
     </div>
   );
 }
