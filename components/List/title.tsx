@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import Button from "../Button";
 import { useState } from "react";
 
-export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: string, connectionCount: number }) {
+export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: string, connectionCount?: number }) {
   const router = useRouter();
   const [isCopied, setIsCopied] = useState(false);
   const handleCopyLink = () => {
