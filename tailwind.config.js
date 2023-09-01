@@ -16,10 +16,15 @@ module.exports = {
         smoothShow: {
           '0%': { opacity: '0%' },
           '100%': { opacity: '100%' },
+        },
+        typing: {
+          '0%, 100%': { opacity: '10%' },
+          '20%': { opacity: '100%' },
         }
       },
       animation: {
         smoothShow: 'smoothShow 0.5s ease-in-out',
+        dotsTyping: 'typing 1.5s linear infinite'
       }
     },
   },

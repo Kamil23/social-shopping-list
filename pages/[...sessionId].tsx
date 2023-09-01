@@ -27,6 +27,7 @@ import {
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { deleteItem, updateSession } from "@/requests";
+import TypingComponent from "@/components/TypingComponent";
 
 export default function SessionList({
   sessionData,
@@ -46,6 +47,8 @@ export default function SessionList({
   const [isLoading, setIsLoading] = useState(false);
   const [draggableId, setDraggableId] = useState("");
   const [connectionCount, setConnectionCount] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const [clientId, setClientId] = useState("");
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -54,9 +57,7 @@ export default function SessionList({
     if (sessionData?.id && !wsRef.current) {
       wsRef.current = new WebSocket(`${websocketUrl}/${sessionData.id}`);
 
-      wsRef.current.onopen = (event) => {
-        // WebSocket opened
-      };
+      wsRef.current.onopen = (event) => {};
 
       wsRef.current.onerror = (event) => {
         if (wsRef.current) {
@@ -79,6 +80,9 @@ export default function SessionList({
         const { type, data } = json;
 
         switch (type) {
+          case WebsocketMessageType.CLIENT_CONNECTED:
+            setClientId(data);
+            break;
           case WebsocketMessageType.CREATE:
             const {
               id,
@@ -133,12 +137,18 @@ export default function SessionList({
           case WebsocketMessageType.CONNECTION_COUNT:
             setConnectionCount(data);
             break;
+          case WebsocketMessageType.START_TYPING:
+            setIsTyping(data.clientId !== clientId);
+            break;
+          case WebsocketMessageType.STOP_TYPING:
+            setIsTyping(false);
+            break;  
           default:
             break;
         }
       };
     }
-  }, [localItems]);
+  }, [localItems, clientId]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -288,6 +298,22 @@ export default function SessionList({
     }
   };
 
+  const handleChangeInput = (value: string) => {
+    setInputValue(value);
+
+    if (isTyping) return;
+
+    setTimeout(() => {
+      if (wsRef.current) {
+        wsRef.current.send(constructPayload(WebsocketMessageType.STOP_TYPING, { value, clientId }));
+      };
+    }, 5000);
+
+    if (wsRef.current) {
+      wsRef.current.send(constructPayload(WebsocketMessageType.START_TYPING, { value, clientId }));
+    }
+  };
+
   const renderContent = () => {
     if (!sessionData?.id) {
       return (
@@ -333,8 +359,9 @@ export default function SessionList({
             </section>
           )}
         </StrictModeDroppable>
+        {isTyping ? <TypingComponent /> : null}
         <Input
-          handleChange={setInputValue}
+          handleChange={handleChangeInput}
           handleSubmit={handleSubmit}
           value={inputValue}
         />

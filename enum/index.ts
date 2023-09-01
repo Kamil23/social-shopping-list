@@ -13,5 +13,8 @@ export enum WebsocketMessageType {
   DELETE = 'delete',
   TOGGLE_CHECK = 'check',
   POSITION_CHANGE = 'position',
-  CONNECTION_COUNT = 'connectionCount'
+  CONNECTION_COUNT = 'connectionCount',
+  CLIENT_CONNECTED = 'clientConnected',
+  START_TYPING = 'startTyping',
+  STOP_TYPING = 'stopTyping',
 }
