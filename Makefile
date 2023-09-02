@@ -21,6 +21,6 @@ deploy-prod:
 	cp postcss.config.js dist/
 	cp tailwind.config.js dist/
 	cp tsconfig.json dist/
-	scp -r dist/* miservice@s56.mydevil.net:domains/freshlist.pl/public_nodejs
-	scp -r dist/.next/* miservice@s56.mydevil.net:domains/freshlist.pl/public_nodejs/.next
+	scp -r dist/* miservice@s56.mydevil.net:domains/livelist.pl/public_nodejs
+	scp -r dist/.next/* miservice@s56.mydevil.net:domains/livelist.pl/public_nodejs/.next
 	ssh miservice@s56.mydevil.net
