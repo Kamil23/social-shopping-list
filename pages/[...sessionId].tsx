@@ -47,7 +47,8 @@ export default function SessionList({
   const [isLoading, setIsLoading] = useState(false);
   const [draggableId, setDraggableId] = useState("");
   const [connectionCount, setConnectionCount] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
+  const [myTyping, setMyTyping] = useState(false);
+  const [receivedTyping, setReceivedTyping] = useState(false);
   const [clientId, setClientId] = useState("");
 
   /** WEBSOCKET */
@@ -108,6 +109,7 @@ export default function SessionList({
                   (item) => item.id === obj.id
                 );
                 shouldUpdate && setLocalItems([...localItems, obj].sort(sortBySortOrder));
+                setReceivedTyping(false);
               }
             } catch (err) {
               console.error(err);
@@ -138,10 +140,11 @@ export default function SessionList({
             setConnectionCount(data);
             break;
           case WebsocketMessageType.START_TYPING:
-            setIsTyping(data.clientId !== clientId);
+            setReceivedTyping(data.clientId !== clientId);
+            setMyTyping(data.clientId === clientId);
             break;
           case WebsocketMessageType.STOP_TYPING:
-            setIsTyping(false);
+            setReceivedTyping(false);
             break;  
           default:
             break;
@@ -301,12 +304,13 @@ export default function SessionList({
   const handleChangeInput = (value: string) => {
     setInputValue(value);
 
-    if (isTyping) return;
+    if (myTyping) return;
 
     setTimeout(() => {
       if (wsRef.current) {
         wsRef.current.send(constructPayload(WebsocketMessageType.STOP_TYPING, { value, clientId }));
       };
+      setMyTyping(false);
     }, 5000);
 
     if (wsRef.current) {
@@ -359,7 +363,7 @@ export default function SessionList({
             </section>
           )}
         </StrictModeDroppable>
-        {isTyping ? <TypingComponent /> : null}
+        {!myTyping && receivedTyping ? <TypingComponent /> : null}
         <Input
           handleChange={handleChangeInput}
           handleSubmit={handleSubmit}
