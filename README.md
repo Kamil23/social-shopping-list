@@ -32,6 +32,7 @@ This app is hosted by **mydevil.net**
   make deploy-prod
 ```
 This copy newest files to storage on mydevil. You will have to specify the password to hosting account.
+> IMPORTANT: if you install new npm packages, you should run `npm i`
 
 1. Above command run ssh shell. You have to restart nodeJS app by command:
 
