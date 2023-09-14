@@ -56,7 +56,7 @@ export default function ListItem({
       <div className="flex w-full justify-between items-center">
         <div className="ml-4">{title}</div>
         <div className="flex relative">
-          <RxDragHandleDots2 className="mr-4 text-xl" />
+          {/* <RxDragHandleDots2 className="mr-4 text-xl" /> */}
           {isLoading && draggableId === id ? (
             <RiLoader5Fill
               className={`animate-spin text-xs absolute right-0`}

@@ -384,7 +384,6 @@ export default function SessionList({
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  //@ts-ignore
   const { sessionId } = context.params;
   try {
     const sessionData = await prisma.session.findUnique({
