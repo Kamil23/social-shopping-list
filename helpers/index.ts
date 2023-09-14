@@ -44,7 +44,7 @@ const blobToString = (blob: Blob): Promise<string | ArrayBuffer | null> => {
   });
 };
 
-export function constructPayload<T>(type: WebsocketMessageType, data: T) {
+export function constructWebsocketPayloadMsg<T>(type: WebsocketMessageType, data: T) {
   return JSON.stringify({
       type,
       data,

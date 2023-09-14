@@ -5,7 +5,7 @@ import Head from "next/head";
 import { prisma } from "@/lib/prisma";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { Item, SessionData } from "@/types/sessionList";
+import { DraggableData, Item, SessionData } from "@/types/sessionList";
 import Input from "@/components/List/input";
 import {
   Dispatch,
@@ -19,7 +19,7 @@ import {
 import Empty from "@/components/Empty";
 import { APIUrl, WebsocketMessageType } from "@/enum";
 import {
-  constructPayload,
+  constructWebsocketPayloadMsg,
   convertBlobToJSON,
   scrollToBottomWithKeyboardAdjustment,
   sortBySortOrder,
@@ -36,7 +36,6 @@ export default function SessionList({
   sessionData: SessionData;
   websocketUrl: string;
 }) {
-  const now = new Date();
   const router = useRouter();
   const { items } = sessionData || {};
   const [inputValue, setInputValue] = useState("");
@@ -49,7 +48,7 @@ export default function SessionList({
   const [connectionCount, setConnectionCount] = useState(0);
   const [myTyping, setMyTyping] = useState(false);
   const [receivedTyping, setReceivedTyping] = useState(false);
-  const [clientId, setClientId] = useState("");
+  const [clientWebsocketId, setClientWebsocketId] = useState("");
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -82,7 +81,7 @@ export default function SessionList({
 
         switch (type) {
           case WebsocketMessageType.CLIENT_CONNECTED:
-            setClientId(data);
+            setClientWebsocketId(data);
             break;
           case WebsocketMessageType.CREATE:
             const {
@@ -140,8 +139,8 @@ export default function SessionList({
             setConnectionCount(data);
             break;
           case WebsocketMessageType.START_TYPING:
-            setReceivedTyping(data.clientId !== clientId);
-            setMyTyping(data.clientId === clientId);
+            setReceivedTyping(data.clientId !== clientWebsocketId);
+            setMyTyping(data.clientId === clientWebsocketId);
             break;
           case WebsocketMessageType.STOP_TYPING:
             setReceivedTyping(false);
@@ -151,11 +150,12 @@ export default function SessionList({
         }
       };
     }
-  }, [localItems, clientId]);
+  }, [localItems, clientWebsocketId]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleAddItem = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      const now = new Date();
       const itemsLength = localItems.length;
       const submittedData = {
         id: window.crypto.randomUUID(),
@@ -194,7 +194,7 @@ export default function SessionList({
 
       if (wsRef.current) {
         wsRef.current.send(
-          constructPayload(WebsocketMessageType.CREATE, submittedData)
+          constructWebsocketPayloadMsg(WebsocketMessageType.CREATE, submittedData)
         );
       }
     } catch (error) {
@@ -202,45 +202,43 @@ export default function SessionList({
     }
   };
 
-  interface DraggableData {
-    draggableId: string;
-    mode: string;
-    source: {};
-    type: string;
-  }
-
   const handleOnDragStart = async (result: DraggableData) => {
-    setIsDragging(true);
-    setDraggableId(result.draggableId);
+    try {
+      setIsDragging(true);
+      setDraggableId(result.draggableId);
+    } catch (error) {
+      console.error("Drag start error: ", error);
+    }
   };
 
   const handleOnDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    try {
+      if (!result.destination) return;
 
-    const list = [...localItems];
-    const [reorderedItem] = list.splice(result.source.index, 1);
-
-    if (result.source.index === result.destination.index) {
+      const list = [...localItems];
+      const [reorderedItem] = list.splice(result.source.index, 1);
+  
+      if (result.source.index === result.destination.index) {
+        setIsDragging(false);
+        return;
+      }
+  
+      setIsLoading(true);
+  
+      list.splice(result.destination.index, 0, reorderedItem);
+      list.map((task, index) => (task.sortOrder = index + 1));
+  
+      setLocalItems(list.sort(sortBySortOrder));
+      await updateSession(list, router.query.sessionId);
+      setIsLoading(false);
       setIsDragging(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    list.splice(result.destination.index, 0, reorderedItem);
-
-    list.map((task, index) => (task.sortOrder = index + 1));
-
-    setLocalItems(list.sort(sortBySortOrder));
-    setIsDragging(false);
-
-    await updateSession(list, router.query.sessionId);
-    setIsLoading(false);
-    setIsDragging(false);
-    if (wsRef.current) {
-      wsRef.current.send(
-        constructPayload(WebsocketMessageType.POSITION_CHANGE, list)
-      );
+      if (wsRef.current) {
+        wsRef.current.send(
+          constructWebsocketPayloadMsg(WebsocketMessageType.POSITION_CHANGE, list)
+        );
+      }
+    } catch (error) {
+      console.error("Drag end error: ", error);
     }
   };
 
@@ -278,7 +276,7 @@ export default function SessionList({
       };
       await fetch(APIUrl.UpdateItem, options);
       if (wsRef.current) {
-        wsRef.current.send(constructPayload(WebsocketMessageType.TOGGLE_CHECK, modifiedData));
+        wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.TOGGLE_CHECK, modifiedData));
       }
     } catch (error) {
       console.error("Modify list item error: ", error);
@@ -297,24 +295,27 @@ export default function SessionList({
     setLocalItems([...updatedList.sort(sortBySortOrder)]);
     await deleteItem(id);
     if (wsRef.current) {
-      wsRef.current.send(constructPayload(WebsocketMessageType.DELETE, { id }));
+      wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.DELETE, { id }));
     }
   };
 
   const handleChangeInput = (value: string) => {
-    setInputValue(value);
-
-    if (myTyping) return;
-
-    setTimeout(() => {
+    try {
+      setInputValue(value);
+      if (myTyping) return;
+  
+      setTimeout(() => {
+        if (wsRef.current) {
+          wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.STOP_TYPING, { value, clientId: clientWebsocketId }));
+        };
+        setMyTyping(false);
+      }, 5000);
+  
       if (wsRef.current) {
-        wsRef.current.send(constructPayload(WebsocketMessageType.STOP_TYPING, { value, clientId }));
-      };
-      setMyTyping(false);
-    }, 5000);
-
-    if (wsRef.current) {
-      wsRef.current.send(constructPayload(WebsocketMessageType.START_TYPING, { value, clientId }));
+        wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.START_TYPING, { value, clientId: clientWebsocketId }));
+      }
+    } catch (error) {
+      console.error("Typing error: ", error);
     }
   };
 
@@ -366,7 +367,7 @@ export default function SessionList({
         {!myTyping && receivedTyping ? <TypingComponent /> : null}
         <Input
           handleChange={handleChangeInput}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleAddItem}
           value={inputValue}
         />
       </DragDropContext>

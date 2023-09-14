@@ -16,3 +16,10 @@ export interface Item {
 }
 
 export type Nullable<NullableType> = NullableType | null | undefined;
+
+export interface DraggableData {
+  draggableId: string;
+  mode: string;
+  source: {};
+  type: string;
+}
