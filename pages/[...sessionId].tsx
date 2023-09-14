@@ -26,8 +26,9 @@ import {
 } from "@/helpers";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
-import { deleteItem, updateSession } from "@/requests";
+import { updateSession } from "@/requests";
 import TypingComponent from "@/components/TypingComponent";
+import DeleteItemModal from "@/components/Modal/DeleteItem";
 
 export default function SessionList({
   sessionData,
@@ -49,6 +50,8 @@ export default function SessionList({
   const [myTyping, setMyTyping] = useState(false);
   const [receivedTyping, setReceivedTyping] = useState(false);
   const [clientWebsocketId, setClientWebsocketId] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -76,7 +79,7 @@ export default function SessionList({
         } else {
           json = await convertBlobToJSON(event.data);
         }
-        
+
         const { type, data } = json;
 
         switch (type) {
@@ -107,7 +110,8 @@ export default function SessionList({
                 const shouldUpdate = !localItems.find(
                   (item) => item.id === obj.id
                 );
-                shouldUpdate && setLocalItems([...localItems, obj].sort(sortBySortOrder));
+                shouldUpdate &&
+                  setLocalItems([...localItems, obj].sort(sortBySortOrder));
                 setReceivedTyping(false);
               }
             } catch (err) {
@@ -144,7 +148,7 @@ export default function SessionList({
             break;
           case WebsocketMessageType.STOP_TYPING:
             setReceivedTyping(false);
-            break;  
+            break;
           default:
             break;
         }
@@ -194,7 +198,10 @@ export default function SessionList({
 
       if (wsRef.current) {
         wsRef.current.send(
-          constructWebsocketPayloadMsg(WebsocketMessageType.CREATE, submittedData)
+          constructWebsocketPayloadMsg(
+            WebsocketMessageType.CREATE,
+            submittedData
+          )
         );
       }
     } catch (error) {
@@ -217,24 +224,27 @@ export default function SessionList({
 
       const list = [...localItems];
       const [reorderedItem] = list.splice(result.source.index, 1);
-  
+
       if (result.source.index === result.destination.index) {
         setIsDragging(false);
         return;
       }
-  
+
       setIsLoading(true);
-  
+
       list.splice(result.destination.index, 0, reorderedItem);
       list.map((task, index) => (task.sortOrder = index + 1));
-  
+
       setLocalItems(list.sort(sortBySortOrder));
       await updateSession(list, router.query.sessionId);
       setIsLoading(false);
       setIsDragging(false);
       if (wsRef.current) {
         wsRef.current.send(
-          constructWebsocketPayloadMsg(WebsocketMessageType.POSITION_CHANGE, list)
+          constructWebsocketPayloadMsg(
+            WebsocketMessageType.POSITION_CHANGE,
+            list
+          )
         );
       }
     } catch (error) {
@@ -276,7 +286,12 @@ export default function SessionList({
       };
       await fetch(APIUrl.UpdateItem, options);
       if (wsRef.current) {
-        wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.TOGGLE_CHECK, modifiedData));
+        wsRef.current.send(
+          constructWebsocketPayloadMsg(
+            WebsocketMessageType.TOGGLE_CHECK,
+            modifiedData
+          )
+        );
       }
     } catch (error) {
       console.error("Modify list item error: ", error);
@@ -290,29 +305,35 @@ export default function SessionList({
     )[0]?.updatedAt || sessionData?.updatedAt;
 
   const handleDeleteItem = async (id: string) => {
-    const list = JSON.parse(JSON.stringify(localItems));
-    const updatedList = list.filter((item: Item) => item.id !== id);
-    setLocalItems([...updatedList.sort(sortBySortOrder)]);
-    await deleteItem(id);
-    if (wsRef.current) {
-      wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.DELETE, { id }));
-    }
+    const itemToDelete = localItems.find((item: Item) => item.id === id);
+    setSelectedItem(itemToDelete);
+    setIsModalOpen(true);
   };
 
   const handleChangeInput = (value: string) => {
     try {
       setInputValue(value);
       if (myTyping) return;
-  
+
       setTimeout(() => {
         if (wsRef.current) {
-          wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.STOP_TYPING, { value, clientId: clientWebsocketId }));
-        };
+          wsRef.current.send(
+            constructWebsocketPayloadMsg(WebsocketMessageType.STOP_TYPING, {
+              value,
+              clientId: clientWebsocketId,
+            })
+          );
+        }
         setMyTyping(false);
       }, 5000);
-  
+
       if (wsRef.current) {
-        wsRef.current.send(constructWebsocketPayloadMsg(WebsocketMessageType.START_TYPING, { value, clientId: clientWebsocketId }));
+        wsRef.current.send(
+          constructWebsocketPayloadMsg(WebsocketMessageType.START_TYPING, {
+            value,
+            clientId: clientWebsocketId,
+          })
+        );
       }
     } catch (error) {
       console.error("Typing error: ", error);
@@ -335,7 +356,10 @@ export default function SessionList({
         <StrictModeDroppable droppableId="list">
           {(provided) => (
             <section {...provided.droppableProps} ref={provided.innerRef}>
-              <ListTitle updatedAt={lastUpdate} connectionCount={connectionCount} />
+              <ListTitle
+                updatedAt={lastUpdate}
+                connectionCount={connectionCount}
+              />
               <div className="flex flex-col">
                 {localItems?.map((item: Item, index) => (
                   <Draggable draggableId={item.id} key={item.id} index={index}>
@@ -379,6 +403,14 @@ export default function SessionList({
       <Head>
         <title>{`Lista zakupowa: ${router.query.sessionId}`}</title>
       </Head>
+      <DeleteItemModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        selectedItem={selectedItem}
+        localItems={localItems}
+        setLocalItems={setLocalItems}
+        ref={wsRef}
+      />
       {renderContent()}
     </Layout>
   );
