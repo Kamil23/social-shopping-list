@@ -1,13 +1,17 @@
 import { useRouter } from "next/router";
 import Button from "../Button";
-import { useState } from "react";
 
 export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: string, connectionCount?: number }) {
   const router = useRouter();
-  const [isCopied, setIsCopied] = useState(false);
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setIsCopied(true);
+  const handleShare = () => {
+    try {
+      navigator.share({
+        title: "Lista zakupów",
+        url: window.location.href,
+      });
+    } catch (e) {
+      console.error(e);
+    }
   };
   const date = new Date(updatedAt);
   return (
@@ -18,8 +22,8 @@ export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: s
           date.toLocaleTimeString() || "Brak"
         }`}</div>
         <Button
-          title={`${isCopied ? "Link został skopiowany!" : "Kopiuj link"}`}
-          handler={handleCopyLink}
+          title="Udostępnij"
+          handler={handleShare}
         />
       </div>
       <div className="flex">{
