@@ -7,6 +7,16 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        'primary-blue': '#017FF3',
+        'dark-blue': '#28537B',
+        'medium-blue': '#2886DC',
+        'light-blue': '#E8F4FF',
+        'white-on-blue': '#F8FBFF',
+      },
+      fontFamily: {
+        'anek-latin': ['Anek Latin', 'sans-serif'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

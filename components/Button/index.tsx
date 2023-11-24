@@ -5,37 +5,37 @@ const Button = ({
   title,
   handler,
   isLoading,
+  bgStyle,
+  textStyle,
+  icon,
 }: {
   title: string;
   handler?: () => void;
   isLoading?: boolean;
+  bgStyle?: string;
+  textStyle?: string;
+  icon?: JSX.Element;
 }) => (
-  <div className="flex flex-1 flex-col space-y-8 justify-center items-center relative">
-    <button
-      disabled={isLoading}
-      onClick={handler}
-      className="group relative inline-block focus:outline-none focus:ring w-fit cursor-pointer transition ease-in-out delay-150"
+  <button
+    disabled={isLoading}
+    onClick={handler}
+    className={`w-[70vw] flex justify-center items-center space-x-2 focus:outline-none cursor-pointer transition ease-in-out delay-150 p-6 rounded-lg ${clsx({
+      ["bg-neutral-500"]: isLoading,
+    })} ${bgStyle}`}
+  >
+    {isLoading ? (
+      <RiLoader5Fill className="animate-spin text-sm" />
+    ) : (
+      <>
+      {icon}
+      </>
+    )}
+    <span
+      className={`font-medium ${textStyle}`}
     >
-      <span
-        className={`absolute inset-0 translate-x-1.5 translate-y-1.5 bg-yellow-300 transition-transform group-hover:translate-y-0 group-hover:translate-x-0 ${clsx(
-          {
-            ["bg-gray-400"]: isLoading,
-          }
-        )}`}
-      ></span>
-
-      <span
-        className={`relative inline-block border-2 border-current px-8 py-3 text-xs font-bold uppercase tracking-widest text-black group-active:text-opacity-75 ${clsx(
-          {
-            ["text-slate-600"]: isLoading,
-          }
-        )}`}
-      >
-        {title}
-      </span>
-    </button>
-    {isLoading ? <RiLoader5Fill className={`animate-spin text-xl absolute top-8`} /> : null}
-  </div>
+      {title}
+    </span>
+  </button>
 );
 
 export default Button;
