@@ -1,43 +1,52 @@
-import { useRouter } from "next/router";
-import Button from "../Button";
+import { updateSessionName } from "@/requests";
+import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { useEffect, useState } from "react";
 
-export default function ListTitle({ updatedAt, connectionCount }: { updatedAt: string, connectionCount?: number }) {
-  const router = useRouter();
-  const handleShare = () => {
-    try {
-      navigator.share({
-        title: "Lista zakupów",
-        url: window.location.href,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  };
-  const date = new Date(updatedAt);
-  return (
-    <div className="flex flex-col space-y-1 mb-4 p-4">
-      <div className="whitespace-nowrap overflow-hidden text-ellipsis">{`Lista: ${router.query.sessionId}`}</div>
-      <div className="flex space-x-2 items-center">
-        <div className="text-xs flex-1">{`Ostatnia zmiana: ${date.toLocaleDateString()} ${
-          date.toLocaleTimeString() || "Brak"
-        }`}</div>
-        <Button
-          title="Udostępnij"
-          handler={handleShare}
-        />
+const ListTitle = ({ isEditing, setIsEditing, name }) => {
+  const [title, setTitle] = useState(name);
+  const sessionId = window.location.pathname.split("/")[1];
+  useEffect(() => {
+    setTitle(name);
+  }, [name]);
+  return isEditing ? (
+    <div className="flex flex-1 h-[56px]">
+      <input
+        type="text"
+        autoFocus={true}
+        value={title}
+        className="w-full p-1 text-xl text-dark-blue focus:outline-none"
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <div className="flex space-x-4">
+        <button
+          className="p-2 text-xl text-dark-blue"
+          onClick={() => {
+            setIsEditing(false);
+            setTitle(name);
+          }}
+        >
+          <XMarkIcon width={24} height={24} />
+        </button>
+        <button
+          className="p-2 text-xl text-dark-blue"
+          onClick={() => {
+            updateSessionName({ name: title }, sessionId);
+            setTitle(title);
+            setIsEditing(false);
+          }}
+        >
+          <CheckIcon width={24} height={24} />
+        </button>
       </div>
-      <div className="flex">{
-        connectionCount > 0 ? (
-          <div className="flex items-center space-x-1">
-          <div className="text-xs flex flex-1">Liczba osób online</div>
-          {
-            Array.from(Array(connectionCount)).map((_, index) => (
-              <div key={index} className="w-2 h-2 bg-green-500 rounded-full animate-smoothShow"></div>
-            ))
-          }
-          </div>
-        ) : null
-      }</div>
+    </div>
+  ) : (
+    <div
+      className="p-1 text-xl text-dark-blue"
+      onClick={() => setIsEditing(true)}
+    >
+      {title}
     </div>
   );
-}
+};
+
+export default ListTitle;

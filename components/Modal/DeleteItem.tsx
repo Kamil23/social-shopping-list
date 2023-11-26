@@ -23,7 +23,6 @@ const DeleteItemModal = forwardRef(
     ref: React.MutableRefObject<WebSocket | null>
   ) => {
     const handleDeleteItem = async (id: string) => {
-      debugger;
       const list = JSON.parse(JSON.stringify(localItems));
       const updatedList = list.filter((item: Item) => item.id !== id);
       setLocalItems([...updatedList.sort(sortBySortOrder)]);

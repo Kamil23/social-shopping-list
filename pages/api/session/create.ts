@@ -1,3 +1,4 @@
+import { generateRandomName } from "@/helpers";
 import { prisma } from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -18,6 +19,7 @@ export default async function createSession(
   await prisma.session.create({
     data: {
       id: sessionId,
+      name: generateRandomName(),
       createdAt: now,
       updatedAt: now,
     },

@@ -24,7 +24,7 @@ const Button = ({
     })} ${bgStyle}`}
   >
     {isLoading ? (
-      <RiLoader5Fill className="animate-spin text-sm" />
+      <RiLoader5Fill className="animate-spin text-sm text-white-on-blue" />
     ) : (
       <>
       {icon}

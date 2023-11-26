@@ -5,6 +5,7 @@ import { RiLoader5Fill } from "react-icons/ri";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { FiTrash } from "react-icons/fi";
 import Checkbox from "../Checkbox";
+import Image from "next/image";
 
 export default function ListItem({
   data,
@@ -47,31 +48,44 @@ export default function ListItem({
   }, [isDisabled, updatedAt]);
   return (
     <div
-      className={`w-full flex p-2 space-x-2 items-center text-slate-800 ${clsx({
+      className={`w-full flex px-4 py-6 space-x-2 items-center border-b border-[#E3EAF0] ${clsx({
         ["line-through text-slate-400"]: isChecked,
         ["bg-yellow-300 text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
       <Checkbox isChecked={isChecked} isDisabled={false} onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)} id={id}/>
       <div className="flex w-full justify-between items-center">
-        <div className="ml-4">{title}</div>
-        <div className="flex relative">
-          {/* <RxDragHandleDots2 className="mr-4 text-xl" /> */}
+        <div className={`mx-4 font-anek-latin text-lg font-light text-[#3D3D3E] ${clsx({
+        ["opacity-50"]: isChecked,
+      })}`}>{title}</div>
+        <div className="flex relative items-center">
           {isLoading && draggableId === id ? (
             <RiLoader5Fill
-              className={`animate-spin text-xs absolute right-0`}
+              className={`animate-spin text-lg absolute right-2 text-slate-300`}
             />
           ) : null}
         </div>
       </div>
-
-      <div className="flex h-0 items-center">
-        <div className="text-[8px]">
-          {renderDate(updatedAt)}
-        </div>
-      </div>
-      <button className="px-2" onClick={() => handleDelete(id)}>
-        <FiTrash className="text-xl" />
+      {/** TODO next feature */}
+      {/* <div className="flex items-center">
+        <button className="w-12 mr-4 flex justify-center items-center">
+          <Image
+            src="/icons/urgent!.svg"
+            alt="ikona przycisku dodaj do ulubionych"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        </button>
+      </div> */}
+      <button className="w-12" onClick={() => handleDelete(id)}>
+      <Image
+            src="/icons/close.svg"
+            alt="ikona przycisku usuń element"
+            width={16}
+            height={16}
+            className="w-3 h-3"
+          />
       </button>
       </div>
   );

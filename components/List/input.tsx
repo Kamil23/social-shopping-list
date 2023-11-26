@@ -25,7 +25,7 @@ export default function Input({
     }
   }, []);
   return (
-    <form onSubmit={(e) => handleSubmit(e)} className="flex p-2">
+    <form onSubmit={(e) => handleSubmit(e)} className="flex px-4 py-6 mx-5 items-center">
       <Checkbox isChecked={false} isDisabled />
       <input
         ref={inputRef}
@@ -33,7 +33,7 @@ export default function Input({
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         placeholder="Dodaj nowy element..."
-        className="ml-4 w-full px-2 border-none focus:outline-none placeholder-gray-300 text-slate-800"
+        className="ml-4 w-full px-2 border-none focus:outline-none placeholder-gray-300 text-slate-800 font-anek-latin text-lg font-light"
         enterKeyHint="next"
       />
       <label></label>

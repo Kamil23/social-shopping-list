@@ -1,5 +1,5 @@
 import ListItem from "@/components/List/item";
-import ListTitle from "@/components/List/title";
+import ListHeader from "@/components/List/header";
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { prisma } from "@/lib/prisma";
@@ -29,6 +29,7 @@ import { StrictModeDroppable } from "@/helpers/StrictModeDroppable";
 import { updateSession } from "@/requests";
 import TypingComponent from "@/components/TypingComponent";
 import DeleteItemModal from "@/components/Modal/DeleteItem";
+import Line from "@/components/Line";
 
 export default function SessionList({
   sessionData,
@@ -38,7 +39,8 @@ export default function SessionList({
   websocketUrl: string;
 }) {
   const router = useRouter();
-  const { items } = sessionData || {};
+  const { items, id, name } = sessionData || {};
+  const [listName, setListName] = useState(sessionData?.name || "Lista" || "");
   const [inputValue, setInputValue] = useState("");
   const [localItems, setLocalItems] = useState(
     items?.sort(sortBySortOrder) || []
@@ -52,6 +54,15 @@ export default function SessionList({
   const [clientWebsocketId, setClientWebsocketId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
+
+  useEffect(() => {
+    if (name) {
+      setListName(name);
+    }
+    if (items) {
+      setLocalItems(items.sort(sortBySortOrder));
+    }
+  }, [name, items]);
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -353,40 +364,48 @@ export default function SessionList({
         onDragEnd={handleOnDragEnd}
         onDragStart={handleOnDragStart}
       >
-        <StrictModeDroppable droppableId="list">
-          {(provided) => (
-            <section {...provided.droppableProps} ref={provided.innerRef}>
-              <ListTitle
-                updatedAt={lastUpdate}
-                connectionCount={connectionCount}
-              />
-              <div className="flex flex-col">
-                {localItems?.map((item: Item, index) => (
-                  <Draggable draggableId={item.id} key={item.id} index={index}>
-                    {(provided) => (
-                      <article
-                        className="w-full"
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                      >
-                        <ListItem
-                          key={item.id}
-                          data={item}
-                          isDragging={isDragging}
-                          isLoading={isLoading}
-                          draggableId={draggableId}
-                          toggleCheck={toggleCheck}
-                          handleDelete={handleDeleteItem}
-                        />
-                      </article>
-                    )}
-                  </Draggable>
-                ))}
-              </div>
-              {provided.placeholder}
-            </section>
-          )}
+        <StrictModeDroppable droppableId={id}>
+          {(provided) => {
+            return (
+              <section {...provided.droppableProps} ref={provided.innerRef}>
+                <ListHeader
+                  updatedAt={lastUpdate}
+                  connectionCount={connectionCount}
+                  listName={listName}
+                />
+                <Line />
+                <div className="flex flex-col m-5 mb-0">
+                  {localItems?.map((item: Item, index) => (
+                    <Draggable
+                      draggableId={item.id}
+                      key={item.id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <article
+                          className="w-full"
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                        >
+                          <ListItem
+                            key={item.id}
+                            data={item}
+                            isDragging={isDragging}
+                            isLoading={isLoading}
+                            draggableId={draggableId}
+                            toggleCheck={toggleCheck}
+                            handleDelete={handleDeleteItem}
+                          />
+                        </article>
+                      )}
+                    </Draggable>
+                  ))}
+                </div>
+                {provided.placeholder}
+              </section>
+            );
+          }}
         </StrictModeDroppable>
         {!myTyping && receivedTyping ? <TypingComponent /> : null}
         <Input
@@ -401,7 +420,7 @@ export default function SessionList({
   return (
     <Layout>
       <Head>
-        <title>{`Lista zakupowa: ${router.query.sessionId}`}</title>
+        <title>{`${listName} - freshlist.pl`}</title>
       </Head>
       <DeleteItemModal
         isOpen={isModalOpen}

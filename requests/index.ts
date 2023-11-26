@@ -48,3 +48,18 @@ export const deleteItem = async (sessionId: string | string[] | undefined) => {
   }
 }
 
+export const updateSessionName = async (dataToUpdate: any, sessionId: string | string[] | undefined) => {
+  try {
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataToUpdate),
+    };
+    await fetch(`${APIUrl.UpdateSessionName}/${sessionId}`, options);
+  } catch (error) {
+    console.error("Problem with update session data", error);
+  }
+}
+
