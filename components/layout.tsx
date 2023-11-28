@@ -1,9 +1,17 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode } from "react";
+import { motion } from "framer-motion";
+import CanvasConfetti from "./CanvasConfetti";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="w-[100vw] h-[100vh]">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-[100vh] h-auto w-[100vw]"
+    >
       {children}
-    </div>
+      <CanvasConfetti />
+    </motion.div>
   );
 }

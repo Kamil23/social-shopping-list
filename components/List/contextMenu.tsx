@@ -106,7 +106,7 @@ const ContextMenu = ({ setIsEditing, handleShare }) => {
             <Menu.Item>
               <button
                 className={`group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                onClick={() => handleCreateSession()}
+                onClick={() => router.push('/')}
               >
                 <div className="flex space-x-2 justify-center items-center">
                   <div className="mx-2 flex justify-center items-center border rounded-[4px] border-[#579AD9] w-4 h-4">

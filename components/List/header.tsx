@@ -34,7 +34,7 @@ export default function ListHeader({
       {/* header bar */}
       <div className="flex justify-between items-center">
         {!isEditing ? (
-          <button className="p-5" onClick={() => router.back()}>
+          <button className="p-5" onClick={() => router.push("/")}>
             <Image
               src="/icons/arrow.svg"
               alt="przycisk wstecz"

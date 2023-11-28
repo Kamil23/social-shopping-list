@@ -14,6 +14,8 @@ module.exports = {
         "light-blue": "#E8F4FF",
         "white-on-blue": "#F8FBFF",
         "light-gray": "#909fac33",
+        "white-on-red": "#FFECE8",
+        "primary-red": "#C50000",
       },
       fontFamily: {
         "anek-latin": ["Anek Latin", "sans-serif"],

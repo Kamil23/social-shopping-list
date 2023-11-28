@@ -30,6 +30,9 @@ import { updateSession } from "@/requests";
 import TypingComponent from "@/components/TypingComponent";
 import DeleteItemModal from "@/components/Modal/DeleteItem";
 import Line from "@/components/Line";
+import ProgressBar from "@/components/ProgressBar";
+import useConfetti from "@/hooks/useConfetti";
+import AddButton from "@/components/AddButton";
 
 export default function SessionList({
   sessionData,
@@ -54,6 +57,11 @@ export default function SessionList({
   const [clientWebsocketId, setClientWebsocketId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
+  const [itemsCheckedCount, setItemsCheckedCount] = useState(
+    items?.filter((item) => item.isDisabled).length || 0
+  );
+  const [activeInput, setActiveInput] = useState(false);
+  const { setTriggered } = useConfetti();
 
   useEffect(() => {
     if (name) {
@@ -63,6 +71,19 @@ export default function SessionList({
       setLocalItems(items.sort(sortBySortOrder));
     }
   }, [name, items]);
+
+  useEffect(() => {
+    const itemsCheckedCount = localItems.filter(
+      (item) => item.isDisabled
+    ).length;
+    setItemsCheckedCount(itemsCheckedCount);
+  }, [localItems]);
+
+  useEffect(() => {
+    if (itemsCheckedCount && itemsCheckedCount === localItems.length) {
+      setTriggered(true);
+    }
+  }, [itemsCheckedCount, localItems, setTriggered]);
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -139,6 +160,7 @@ export default function SessionList({
             setLocalItems([...filteredItems]);
             break;
           case WebsocketMessageType.TOGGLE_CHECK:
+            debugger;
             const indexOfSelectedItem = localItems.findIndex(
               (item) => item.id === data.id
             );
@@ -286,6 +308,9 @@ export default function SessionList({
       localItems[indexOfSelectedItem].isDisabled = !isChecked;
       const sortedItems = localItems.sort(sortBySortOrder);
       setLocalItems([...sortedItems]);
+      setItemsCheckedCount(
+        sortedItems.filter((item) => item.isDisabled).length
+      );
 
       const JSONdata = JSON.stringify(modifiedData);
       const options = {
@@ -374,7 +399,7 @@ export default function SessionList({
                   listName={listName}
                 />
                 <Line />
-                <div className="flex flex-col m-5 mb-0">
+                <div className={`flex flex-col m-5 ${itemsCheckedCount > 0 && !activeInput ? "mb-[150px]" : "mb-0"}`}>
                   {localItems?.map((item: Item, index) => (
                     <Draggable
                       draggableId={item.id}
@@ -408,11 +433,14 @@ export default function SessionList({
           }}
         </StrictModeDroppable>
         {!myTyping && receivedTyping ? <TypingComponent /> : null}
-        <Input
-          handleChange={handleChangeInput}
-          handleSubmit={handleAddItem}
-          value={inputValue}
-        />
+        {activeInput ? (
+          <Input
+            handleChange={handleChangeInput}
+            handleSubmit={handleAddItem}
+            value={inputValue}
+            itemsCheckedCount={itemsCheckedCount}
+          />
+        ) : null}
       </DragDropContext>
     );
   };
@@ -420,7 +448,7 @@ export default function SessionList({
   return (
     <Layout>
       <Head>
-        <title>{`${listName} - freshlist.pl`}</title>
+        <title>{`${listName} | freshlist.pl`}</title>
       </Head>
       <DeleteItemModal
         isOpen={isModalOpen}
@@ -431,6 +459,13 @@ export default function SessionList({
         ref={wsRef}
       />
       {renderContent()}
+      {activeInput ? null : <AddButton handler={() => setActiveInput(true)} />}
+      {itemsCheckedCount === 0 ? null : (
+        <ProgressBar
+          allItemsCount={localItems.length}
+          itemsCheckedCount={itemsCheckedCount}
+        />
+      )}
     </Layout>
   );
 }

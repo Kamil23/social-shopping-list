@@ -68,7 +68,7 @@ export default function Home() {
             }
           />
           <Button
-            title="Podaj link do listy znajomego"
+            title="Podaj link"
             handler={handleCreateSession}
             bgStyle="bg-light-blue"
             textStyle="text-medium-blue"

@@ -2,8 +2,6 @@ import { Item } from "@/types/sessionList";
 import clsx from "clsx";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { RiLoader5Fill } from "react-icons/ri";
-import { RxDragHandleDots2 } from "react-icons/rx";
-import { FiTrash } from "react-icons/fi";
 import Checkbox from "../Checkbox";
 import Image from "next/image";
 
@@ -50,7 +48,7 @@ export default function ListItem({
     <div
       className={`w-full flex px-4 py-6 space-x-2 items-center border-b border-[#E3EAF0] ${clsx({
         ["line-through text-slate-400"]: isChecked,
-        ["bg-yellow-300 text-slate-300"]: isDragging && draggableId === id,
+        ["bg-light-blue text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
       <Checkbox isChecked={isChecked} isDisabled={false} onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)} id={id}/>

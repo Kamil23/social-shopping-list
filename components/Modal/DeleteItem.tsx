@@ -4,6 +4,7 @@ import { deleteItem } from "@/requests";
 import { Item } from "@/types/sessionList";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, forwardRef } from "react";
+import Image from "next/image";
 
 const DeleteItemModal = forwardRef(
   (
@@ -66,25 +67,42 @@ const DeleteItemModal = forwardRef(
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    Na pewno?
-                  </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Element <b>{selectedItem?.title}</b> zostanie usunięty z listy
+                  <div className="mt-10 relative">
+                    <p className="text-xl text-[#000F1D] font-anek-latin font-light leading-7 text-center">
+                      Czy na pewno chcesz usunąć{" "}
+                      <b className="text-primary-red font-semibold">
+                        {selectedItem?.title}
+                      </b>{" "}
+                      ze swojej listy produktów?
                     </p>
+                    <button
+                      className="p-6 absolute -right-4 top-[-60px]"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Image
+                        src="/icons/close-modal.svg"
+                        alt="ikona zamknięcia modala"
+                        width={10}
+                        height={10}
+                        className=""
+                      />
+                    </button>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 p-6 flex justify-center items-center">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                      className="px-6 py-4 rounded-lg bg-primary-red text-white-on-red font-anek-latin font-light text-base w-full"
                       onClick={() => handleDeleteItem(selectedItem.id)}
                     >
                       Usuń
+                    </button>
+                    <button
+                      type="button"
+                      className="px-6 py-4 rounded-lg text-[#000F1D]  font-anek-latin font-light text-base w-full"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Nie usuwaj
                     </button>
                   </div>
                 </Dialog.Panel>

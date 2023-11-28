@@ -11,10 +11,12 @@ export default function Input({
   value,
   handleChange,
   handleSubmit,
+  itemsCheckedCount
 }: {
   value: string;
   handleChange: Dispatch<SetStateAction<string>>;
   handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  itemsCheckedCount: number;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -25,7 +27,7 @@ export default function Input({
     }
   }, []);
   return (
-    <form onSubmit={(e) => handleSubmit(e)} className="flex px-4 py-6 mx-5 items-center">
+    <form onSubmit={(e) => handleSubmit(e)} className={`flex px-4 py-6 mx-5 items-center ${itemsCheckedCount > 0 ? "pb-[150px]" : ""}`}>
       <Checkbox isChecked={false} isDisabled />
       <input
         ref={inputRef}
