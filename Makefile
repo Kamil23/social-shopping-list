@@ -6,6 +6,7 @@ deploy-prod-freshlist:
 	cp -r components dist/
 	cp -r enum dist/
 	cp -r helpers dist/
+	cp -r hooks dist/
 	cp -r lib dist/
 	cp -r pages dist/
 	cp -r prisma dist/
@@ -27,12 +28,14 @@ deploy-prod-freshlist:
 
 deploy-prod-livelist:
 	rm -rf .next/
+	rm -rf dist/
 	npm run build
 	mkdir -p dist
 	cp -r .next dist/
 	cp -r components dist/
 	cp -r enum dist/
 	cp -r helpers dist/
+	cp -r hooks dist/
 	cp -r lib dist/
 	cp -r pages dist/
 	cp -r prisma dist/
