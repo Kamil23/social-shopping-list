@@ -160,7 +160,6 @@ export default function SessionList({
             setLocalItems([...filteredItems]);
             break;
           case WebsocketMessageType.TOGGLE_CHECK:
-            debugger;
             const indexOfSelectedItem = localItems.findIndex(
               (item) => item.id === data.id
             );
@@ -385,63 +384,85 @@ export default function SessionList({
       );
     }
     return (
-      <DragDropContext
-        onDragEnd={handleOnDragEnd}
-        onDragStart={handleOnDragStart}
-      >
-        <StrictModeDroppable droppableId={id}>
-          {(provided) => {
-            return (
-              <section {...provided.droppableProps} ref={provided.innerRef}>
-                <ListHeader
-                  updatedAt={lastUpdate}
-                  connectionCount={connectionCount}
-                  listName={listName}
-                />
-                <Line />
-                <div className={`flex flex-col m-5 ${itemsCheckedCount > 0 && !activeInput ? "mb-[150px]" : "mb-0"}`}>
-                  {localItems?.map((item: Item, index) => (
-                    <Draggable
-                      draggableId={item.id}
-                      key={item.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <article
-                          className="w-full"
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                        >
-                          <ListItem
-                            key={item.id}
-                            data={item}
-                            isDragging={isDragging}
-                            isLoading={isLoading}
-                            draggableId={draggableId}
-                            toggleCheck={toggleCheck}
-                            handleDelete={handleDeleteItem}
-                          />
-                        </article>
-                      )}
-                    </Draggable>
-                  ))}
-                </div>
-                {provided.placeholder}
-              </section>
-            );
-          }}
-        </StrictModeDroppable>
-        {!myTyping && receivedTyping ? <TypingComponent /> : null}
-        {activeInput ? (
-          <Input
-            handleChange={handleChangeInput}
-            handleSubmit={handleAddItem}
-            value={inputValue}
+      <>
+        <DragDropContext
+          onDragEnd={handleOnDragEnd}
+          onDragStart={handleOnDragStart}
+        >
+          <StrictModeDroppable droppableId={id}>
+            {(provided) => {
+              return (
+                <section {...provided.droppableProps} ref={provided.innerRef}>
+                  <ListHeader
+                    updatedAt={lastUpdate}
+                    connectionCount={connectionCount}
+                    listName={listName}
+                    setListName={setListName}
+                    sessionData={sessionData}
+                  />
+                  <Line />
+                  <div
+                    className={`flex flex-col m-5 ${
+                      itemsCheckedCount > 0 && !activeInput
+                        ? "mb-[150px]"
+                        : "mb-0"
+                    }`}
+                  >
+                    {localItems?.map((item: Item, index) => (
+                      <Draggable
+                        draggableId={item.id}
+                        key={item.id}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <article
+                            className="w-full"
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            ref={provided.innerRef}
+                          >
+                            <ListItem
+                              key={item.id}
+                              data={item}
+                              isDragging={isDragging}
+                              isLoading={isLoading}
+                              draggableId={draggableId}
+                              toggleCheck={toggleCheck}
+                              handleDelete={handleDeleteItem}
+                            />
+                          </article>
+                        )}
+                      </Draggable>
+                    ))}
+                  </div>
+                  {provided.placeholder}
+                </section>
+              );
+            }}
+          </StrictModeDroppable>
+          {!myTyping && receivedTyping ? <TypingComponent /> : null}
+          {activeInput ? (
+            <Input
+              handleChange={handleChangeInput}
+              handleSubmit={handleAddItem}
+              value={inputValue}
+              itemsCheckedCount={itemsCheckedCount}
+            />
+          ) : null}
+        </DragDropContext>
+        {activeInput ? null : (
+          <AddButton
+            handler={() => setActiveInput(true)}
             itemsCheckedCount={itemsCheckedCount}
           />
-        ) : null}
-      </DragDropContext>
+        )}
+        {itemsCheckedCount === 0 ? null : (
+          <ProgressBar
+            allItemsCount={localItems.length}
+            itemsCheckedCount={itemsCheckedCount}
+          />
+        )}
+      </>
     );
   };
 
@@ -459,13 +480,6 @@ export default function SessionList({
         ref={wsRef}
       />
       {renderContent()}
-      {activeInput ? null : <AddButton handler={() => setActiveInput(true)} />}
-      {itemsCheckedCount === 0 ? null : (
-        <ProgressBar
-          allItemsCount={localItems.length}
-          itemsCheckedCount={itemsCheckedCount}
-        />
-      )}
     </Layout>
   );
 }

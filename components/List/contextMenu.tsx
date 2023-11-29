@@ -1,16 +1,39 @@
 import Image from "next/image";
 import { Menu, Transition } from "@headlessui/react";
-import Link from "next/link";
-import { Fragment, useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Fragment } from "react";
 import { createSession } from "@/requests";
 import { useRouter } from "next/router";
 
-const ContextMenu = ({ setIsEditing, handleShare }) => {
+const ContextMenu = ({ setIsEditing, handleShare, sessionData }) => {
   const router = useRouter();
   const handleCreateSession = async () => {
     const sessionId = await createSession();
     router.push(sessionId);
+  };
+  const handleAddToFavorites = () => {
+    if (!window) {
+      return;
+    }
+    const favoritesList = window.localStorage.getItem("favoritesList");
+    if (!favoritesList) {
+      window.localStorage.setItem(
+        "favoritesList",
+        JSON.stringify([sessionData])
+      );
+      return;
+    }
+    const parsedFavoritesList = JSON.parse(favoritesList);
+    const isListAlreadyAdded = parsedFavoritesList.find(
+      (list) => list.id === sessionData.id
+    );
+    if (isListAlreadyAdded) {
+      return;
+    }
+    parsedFavoritesList.push(sessionData);
+    window.localStorage.setItem(
+      "favoritesList",
+      JSON.stringify(parsedFavoritesList)
+    );
   };
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -86,6 +109,7 @@ const ContextMenu = ({ setIsEditing, handleShare }) => {
             <Menu.Item>
               <button
                 className={`group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                onClick={() => handleAddToFavorites()}
               >
                 <div className="flex space-x-2">
                   <Image

@@ -5,15 +5,20 @@ import Image from "next/image";
 import ListTitle from "./title";
 import ContextMenu from "./contextMenu";
 import { generateSingularOrPlural } from "@/helpers";
+import { SessionData } from "@/types/sessionList";
 
 export default function ListHeader({
   updatedAt,
   connectionCount,
   listName,
+  setListName,
+  sessionData,
 }: {
   updatedAt: string;
   connectionCount?: number;
   listName: string;
+  setListName: (name: string) => void;
+  sessionData: SessionData;
 }) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -48,9 +53,10 @@ export default function ListHeader({
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           name={listName}
+          setListName={setListName}
         />
         {!isEditing ? (
-          <ContextMenu setIsEditing={setIsEditing} handleShare={handleShare} />
+          <ContextMenu setIsEditing={setIsEditing} handleShare={handleShare} sessionData={sessionData} />
         ) : null}
       </div>
       {/* header description */}

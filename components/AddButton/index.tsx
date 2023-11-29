@@ -1,10 +1,10 @@
 import Image from "next/image";
 
-const AddButton = ({ handler }) => {
+const AddButton = ({ handler, itemsCheckedCount }) => {
   return (
     <div
       onClick={handler}
-      className="fixed bottom-40 right-9 w-16 h-16 rounded-full bg-primary-blue flex justify-center items-center"
+      className={`fixed ${itemsCheckedCount > 0 ? "bottom-40" : "bottom-10" } right-9 w-16 h-16 rounded-full bg-primary-blue flex justify-center items-center`}
     >
       <Image
         src="/icons/plus-add-element.svg"

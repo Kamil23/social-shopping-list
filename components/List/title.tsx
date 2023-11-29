@@ -2,12 +2,38 @@ import { updateSessionName } from "@/requests";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useState } from "react";
 
-const ListTitle = ({ isEditing, setIsEditing, name }) => {
+const ListTitle = ({ isEditing, setIsEditing, name, setListName }) => {
   const [title, setTitle] = useState(name);
   const sessionId = window.location.pathname.split("/")[1];
+
+  const refreshLocalStorageData = (title, sessionId) => {
+    if (!window) {
+      return;
+    }
+    const favoritesList = window.localStorage.getItem("favoritesList");
+    if (!favoritesList) {
+      return;
+    }
+    const parsedFavoritesList = JSON.parse(favoritesList);
+    const updatedFavoritesList = parsedFavoritesList.map((list) => {
+      if (list.id === sessionId) {
+        return {
+          ...list,
+          name: title,
+        };
+      }
+      return list;
+    });
+    window.localStorage.setItem(
+      "favoritesList",
+      JSON.stringify(updatedFavoritesList)
+    );
+  };
+
   useEffect(() => {
     setTitle(name);
   }, [name]);
+
   return isEditing ? (
     <div className="flex flex-1 h-[56px]">
       <input
@@ -32,7 +58,9 @@ const ListTitle = ({ isEditing, setIsEditing, name }) => {
           onClick={() => {
             updateSessionName({ name: title }, sessionId);
             setTitle(title);
+            setListName(title);
             setIsEditing(false);
+            refreshLocalStorageData(title, sessionId);
           }}
         >
           <CheckIcon width={24} height={24} />

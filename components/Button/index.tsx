@@ -8,6 +8,7 @@ const Button = ({
   bgStyle,
   textStyle,
   icon,
+  additionalStyle,
 }: {
   title: string;
   handler?: () => void;
@@ -15,6 +16,7 @@ const Button = ({
   bgStyle?: string;
   textStyle?: string;
   icon?: JSX.Element;
+  additionalStyle?: Record<string, unknown>;
 }) => (
   <button
     disabled={isLoading}
@@ -22,6 +24,7 @@ const Button = ({
     className={`w-[70vw] flex justify-center items-center space-x-2 focus:outline-none cursor-pointer transition ease-in-out delay-150 p-6 rounded-lg ${clsx({
       ["bg-neutral-500"]: isLoading,
     })} ${bgStyle}`}
+    style={additionalStyle}
   >
     {isLoading ? (
       <RiLoader5Fill className="animate-spin text-sm text-white-on-blue" />
