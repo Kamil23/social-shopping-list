@@ -402,7 +402,7 @@ export default function SessionList({
                   />
                   <Line />
                   <div
-                    className={`flex flex-col m-5 ${
+                    className={`flex flex-col m-1 ${
                       itemsCheckedCount > 0 && !activeInput
                         ? "mb-[150px]"
                         : "mb-0"

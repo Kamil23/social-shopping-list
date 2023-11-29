@@ -46,14 +46,14 @@ export default function ListItem({
   }, [isDisabled, updatedAt]);
   return (
     <div
-      className={`w-full flex px-4 py-6 space-x-2 items-center border-b border-[#E3EAF0] ${clsx({
+      className={`w-full flex px-4 py-2 space-x-2 items-center ${clsx({
         ["line-through text-slate-400"]: isChecked,
         ["bg-light-blue text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
       <Checkbox isChecked={isChecked} isDisabled={false} onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)} id={id}/>
       <div className="flex w-full justify-between items-center">
-        <div className={`mx-4 font-anek-latin text-lg font-light text-[#3D3D3E] ${clsx({
+        <div className={`mx-4 font-anek-latin text-base font-light text-[#3D3D3E] ${clsx({
         ["opacity-50"]: isChecked,
       })}`}>{title}</div>
         <div className="flex relative items-center">

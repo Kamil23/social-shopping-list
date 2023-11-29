@@ -21,7 +21,7 @@ const Button = ({
   <button
     disabled={isLoading}
     onClick={handler}
-    className={`w-[70vw] flex justify-center items-center space-x-2 focus:outline-none cursor-pointer transition ease-in-out delay-150 p-6 rounded-lg ${clsx({
+    className={`w-[70vw] flex justify-center items-center space-x-2 focus:outline-none cursor-pointer transition ease-in-out delay-150 p-4 rounded-lg ${clsx({
       ["bg-neutral-500"]: isLoading,
     })} ${bgStyle}`}
     style={additionalStyle}
@@ -34,7 +34,7 @@ const Button = ({
       </>
     )}
     <span
-      className={`font-medium ${textStyle}`}
+      className={`font-medium text-sm ${textStyle}`}
     >
       {title}
     </span>

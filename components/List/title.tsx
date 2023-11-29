@@ -40,12 +40,12 @@ const ListTitle = ({ isEditing, setIsEditing, name, setListName }) => {
         type="text"
         autoFocus={true}
         value={title}
-        className="w-full p-1 text-xl text-dark-blue focus:outline-none"
+        className="w-full p-1 text-base text-dark-blue focus:outline-none"
         onChange={(e) => setTitle(e.target.value)}
       />
       <div className="flex space-x-4">
         <button
-          className="p-2 text-xl text-dark-blue"
+          className="p-2 text-lg text-dark-blue"
           onClick={() => {
             setIsEditing(false);
             setTitle(name);
@@ -54,7 +54,7 @@ const ListTitle = ({ isEditing, setIsEditing, name, setListName }) => {
           <XMarkIcon width={24} height={24} />
         </button>
         <button
-          className="p-2 text-xl text-dark-blue"
+          className="p-2 text-lg text-dark-blue"
           onClick={() => {
             updateSessionName({ name: title }, sessionId);
             setTitle(title);
@@ -69,7 +69,7 @@ const ListTitle = ({ isEditing, setIsEditing, name, setListName }) => {
     </div>
   ) : (
     <div
-      className="p-1 text-xl text-dark-blue"
+      className="p-1 text-base text-dark-blue"
       onClick={() => setIsEditing(true)}
     >
       {title}

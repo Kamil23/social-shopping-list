@@ -16,17 +16,17 @@ export default function Empty() {
   return (
     <div className="flex h-auto mx-5 my-10 py-10 justify-center items-center space-y-10 flex-col border border-[#E4F2FF] rounded-2xl font-anek-latin">
       {/** icon */}
-      <div className="bg-light-blue rounded-full flex justify-center items-center w-[240px] h-[240px]">
+      <div className="bg-light-blue rounded-full flex justify-center items-center w-[180px] h-[180px]">
         <div className="relative">
           <Image
             src="/icons/list.svg"
             alt="doc icon"
-            className="w-32 h-36"
-            width={128}
-            height={153}
+            className="w-24 h-28"
+            width={96}
+            height={112}
           />
           <div className="absolute -bottom-[24px] -right-[24px] rounded-full bg-light-blue p-2">
-            <div className="bg-primary-blue rounded-full p-6">
+            <div className="bg-primary-blue rounded-full p-4">
               <Image
                 src="/icons/warning.svg"
                 alt="plus icon"
@@ -41,15 +41,15 @@ export default function Empty() {
 
       {/** title */}
       <div className="px-10 flex flex-col justify-center items-center">
-        <h1 className="font-semibold text-dark-blue text-3xl mb-5">Uuups!</h1>
-        <h2 className="text-xl text-[#000F1D] text-center mb-10">
+        <h1 className="font-semibold text-dark-blue text-2xl mb-5">Uuups!</h1>
+        <h2 className="text-lg text-[#000F1D] text-center mb-10">
           Podana lista nie istnieje :(
         </h2>
-        <p className="text-lg text-[#000F1D] text-center font-light">
+        <p className="text-sm text-[#000F1D] text-center font-light">
         Prawdopodobnie masz błąd w linku do listy lub link jest niekompletny.
         </p>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <Button
           title="Stwórz nową listę"
           handler={handleCreateSession}
@@ -60,9 +60,9 @@ export default function Empty() {
             <Image
               src="/icons/plus.svg"
               alt="plus icon"
-              className="w-3 h-3"
-              width={12}
-              height={12}
+              className="w-2 h-2"
+              width={8}
+              height={8}
             />
           }
         />
@@ -75,9 +75,9 @@ export default function Empty() {
             <Image
               src="/icons/arrow-back-join.svg"
               alt="ikona strzałki"
-              className="w-4 h-4"
-              width={16}
-              height={16}
+              className="w-3 h-3"
+              width={12}
+              height={12}
             />
           }
         />

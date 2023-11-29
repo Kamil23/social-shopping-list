@@ -67,8 +67,8 @@ const DeleteItemModal = forwardRef(
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <div className="mt-10 relative">
-                    <p className="text-xl text-[#000F1D] font-anek-latin font-light leading-7 text-center">
+                  <div className="mt-8 relative">
+                    <p className="text-base text-[#000F1D] font-anek-latin font-light leading-6 text-center">
                       Czy na pewno chcesz usunąć{" "}
                       <b className="text-primary-red font-semibold">
                         {selectedItem?.title}
@@ -89,17 +89,17 @@ const DeleteItemModal = forwardRef(
                     </button>
                   </div>
 
-                  <div className="mt-4 p-6 flex justify-center items-center">
+                  <div className="mt-4 p-2 flex justify-center items-center">
                     <button
                       type="button"
-                      className="px-6 py-4 rounded-lg bg-primary-red text-white-on-red font-anek-latin font-light text-base w-full"
+                      className="px-6 py-4 rounded-lg bg-primary-red text-white-on-red font-anek-latin font-light text-sm w-full"
                       onClick={() => handleDeleteItem(selectedItem.id)}
                     >
                       Usuń
                     </button>
                     <button
                       type="button"
-                      className="px-6 py-4 rounded-lg text-[#000F1D]  font-anek-latin font-light text-base w-full"
+                      className="px-6 py-4 rounded-lg text-[#000F1D]  font-anek-latin font-light text-sm w-full"
                       onClick={() => setIsOpen(false)}
                     >
                       Nie usuwaj

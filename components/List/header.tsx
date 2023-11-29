@@ -35,7 +35,7 @@ export default function ListHeader({
   };
   const date = new Date(updatedAt);
   return (
-    <div className="flex flex-col space-y-5 mb-4 p-5">
+    <div className="flex flex-col space-y-1 mb-3 p-2">
       {/* header bar */}
       <div className="flex justify-between items-center">
         {!isEditing ? (
@@ -60,17 +60,17 @@ export default function ListHeader({
         ) : null}
       </div>
       {/* header description */}
-      <div className="flex space-x-5">
-        <div className="flex flex-col justify-center space-y-1 flex-2">
+      <div className="flex space-x-5 mx-2">
+        <div className="flex flex-col justify-center flex-2">
           <div className="flex space-x-2 items-center">
-            <span className="text-[#000F1D] text-sm">Teraz online:</span>
-            <span className="text-[#909FAC] text-sm">{`${connectionCount} ${generateSingularOrPlural(
+            <span className="text-[#000F1D] text-xs">Teraz online:</span>
+            <span className="text-[#909FAC] text-xs">{`${connectionCount} ${generateSingularOrPlural(
               connectionCount
             )}`}</span>
           </div>
           <div className="flex space-x-2 items-center">
-            <span className="text-[#000F1D] text-sm">Zmiany:</span>
-            <span className="text-[#909FAC] text-sm">{`${date
+            <span className="text-[#000F1D] text-xs">Zmiany:</span>
+            <span className="text-[#909FAC] text-xs">{`${date
               .toLocaleDateString()
               .replaceAll("/", ".")} ${date.toLocaleTimeString()}`}</span>
           </div>
@@ -87,7 +87,7 @@ export default function ListHeader({
               width={16}
               height={16}
             />
-            <span className={`font-medium text-medium-blue`}>Udostępnij</span>
+            <span className={`font-medium text-medium-blue text-sm`}>Udostępnij</span>
           </button>
         </div>
       </div>

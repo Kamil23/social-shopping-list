@@ -55,8 +55,8 @@ export default function JoinList() {
     <div>
       <main className="flex min-h-[100vh] h-auto mx-5 my-10 py-10 justify-around items-center space-y-10 flex-col border border-[#E4F2FF] rounded-2xl font-anek-latin">
         {/** title */}
-        <div className="px-10 w-full flex flex-col justify-center items-center space-y-16">
-          <h1 className="font-semibold text-dark-blue text-3xl mb-5 text-center">
+        <div className="px-10 w-full flex flex-col justify-center items-center space-y-4">
+          <h1 className="font-semibold text-dark-blue text-2xl mb-5 text-center">
             Dodaj listę znajomego
           </h1>
           <div className="flex items-center w-full">
@@ -67,7 +67,7 @@ export default function JoinList() {
                 e.preventDefault();
                 setInputValue(e.target.value);
               }}
-              className={`w-full text-medium-blue placeholder-medium-blue font-anek-latin font-light px-4 py-6 bg-light-blue ${
+              className={`w-full text-medium-blue placeholder-medium-blue font-anek-latin font-light px-4 py-4 bg-light-blue text-sm ${
                 isCorrectUrl ? "rounded-l-lg" : "rounded-lg"
               }  outline-none`}
             />
@@ -76,7 +76,7 @@ export default function JoinList() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.7 }}
-                className="flex justify-center items-center bg-primary-blue rounded-r-lg w-[72px] h-[72px]"
+                className="flex justify-center items-center bg-primary-blue rounded-r-lg w-[72px] h-[52px]"
                 onClick={() => {
                   router.push(inputValue.split("/")[3]);
                 }}
@@ -101,7 +101,7 @@ export default function JoinList() {
             width={12}
             height={8}
           />
-          <span className="font-medium text-medium-blue">
+          <span className="font-medium text-medium-blue text-sm">
             Wróć do widoku głównego
           </span>
         </button>
