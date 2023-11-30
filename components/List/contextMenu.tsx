@@ -132,15 +132,14 @@ const ContextMenu = ({ setIsEditing, handleShare, sessionData }) => {
                 className={`group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                 onClick={() => router.push('/')}
               >
-                <div className="flex space-x-2 justify-center items-center">
-                  <div className="mx-2 flex justify-center items-center border rounded-[4px] border-[#579AD9] w-4 h-4">
+                <div className="flex space-x-2">
                     <Image
-                      src="/icons/plus-context.svg"
-                      alt="ikona dodaj do ulubionych"
-                      width={7}
-                      height={7}
+                      src="/icons/document.svg"
+                      alt="ikona moje listy"
+                      width={16}
+                      height={28}
+                      className="mx-2"
                     />
-                  </div>
 
                   <span className="text-base text-[#000F1D]">
                     Moje listy
@@ -157,7 +156,7 @@ const ContextMenu = ({ setIsEditing, handleShare, sessionData }) => {
                   <div className="mx-2 flex justify-center items-center border rounded-[4px] border-[#579AD9] w-4 h-4">
                     <Image
                       src="/icons/plus-context.svg"
-                      alt="ikona dodaj do ulubionych"
+                      alt="ikona dodaj nową listę"
                       width={7}
                       height={7}
                     />

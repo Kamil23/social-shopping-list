@@ -61,7 +61,8 @@ export default function SessionList({
     items?.filter((item) => item.isDisabled).length || 0
   );
   const [activeInput, setActiveInput] = useState(false);
-  const { setTriggered } = useConfetti();
+  const { setTriggered: triggerConfetti } = useConfetti();
+  debugger;
 
   useEffect(() => {
     if (name) {
@@ -81,9 +82,9 @@ export default function SessionList({
 
   useEffect(() => {
     if (itemsCheckedCount && itemsCheckedCount === localItems.length) {
-      setTriggered(true);
+      triggerConfetti(true);
     }
-  }, [itemsCheckedCount, localItems, setTriggered]);
+  }, [itemsCheckedCount, localItems, triggerConfetti]);
 
   /** WEBSOCKET */
   const wsRef: MutableRefObject<WebSocket | undefined> = useRef();
@@ -151,7 +152,12 @@ export default function SessionList({
             }
             break;
           case WebsocketMessageType.UPDATE:
-            alert("update");
+            const indexOfUpdatedItem = localItems.findIndex(
+              (item) => item.id === data.id
+            );
+            localItems[indexOfUpdatedItem].updatedAt = data.updatedAt;
+            localItems[indexOfUpdatedItem].title = data.title;
+            setLocalItems([...localItems]);
             break;
           case WebsocketMessageType.DELETE:
             const filteredItems = localItems.filter(
@@ -177,6 +183,7 @@ export default function SessionList({
           case WebsocketMessageType.START_TYPING:
             setReceivedTyping(data.clientId !== clientWebsocketId);
             setMyTyping(data.clientId === clientWebsocketId);
+            debugger;
             break;
           case WebsocketMessageType.STOP_TYPING:
             setReceivedTyping(false);
@@ -256,6 +263,8 @@ export default function SessionList({
 
       const list = [...localItems];
       const [reorderedItem] = list.splice(result.source.index, 1);
+      const now = new Date().toISOString();
+      reorderedItem.updatedAt = now;
 
       if (result.source.index === result.destination.index) {
         setIsDragging(false);
@@ -324,6 +333,45 @@ export default function SessionList({
         wsRef.current.send(
           constructWebsocketPayloadMsg(
             WebsocketMessageType.TOGGLE_CHECK,
+            modifiedData
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Modify list item error: ", error);
+    }
+  };
+
+  const handleEditItem = async (id: string, title: string) => {
+    try {
+      const now = new Date().toISOString();
+      const modifiedData = {
+        id,
+        title,
+        updatedAt: now,
+      };
+
+      const indexOfSelectedItem = localItems.findIndex(
+        (item) => item.id === id
+      );
+      localItems[indexOfSelectedItem].updatedAt = now;
+      localItems[indexOfSelectedItem].title = title;
+      const sortedItems = localItems.sort(sortBySortOrder);
+      setLocalItems([...sortedItems]);
+
+      const JSONdata = JSON.stringify(modifiedData);
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSONdata,
+      };
+      await fetch(APIUrl.UpdateItem, options);
+      if (wsRef.current) {
+        wsRef.current.send(
+          constructWebsocketPayloadMsg(
+            WebsocketMessageType.UPDATE,
             modifiedData
           )
         );
@@ -408,32 +456,35 @@ export default function SessionList({
                         : "mb-0"
                     }`}
                   >
-                    {localItems?.map((item: Item, index) => (
-                      <Draggable
-                        draggableId={item.id}
-                        key={item.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <article
-                            className="w-full"
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            ref={provided.innerRef}
-                          >
-                            <ListItem
-                              key={item.id}
-                              data={item}
-                              isDragging={isDragging}
-                              isLoading={isLoading}
-                              draggableId={draggableId}
-                              toggleCheck={toggleCheck}
-                              handleDelete={handleDeleteItem}
-                            />
-                          </article>
-                        )}
-                      </Draggable>
-                    ))}
+                    {localItems?.map((item: Item, index) => {
+                      return (
+                        <Draggable
+                          draggableId={item.id}
+                          key={item.id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <article
+                              className="w-full"
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              ref={provided.innerRef}
+                            >
+                              <ListItem
+                                key={item.id}
+                                data={item}
+                                isDragging={isDragging}
+                                isLoading={isLoading}
+                                draggableId={draggableId}
+                                toggleCheck={toggleCheck}
+                                handleDelete={handleDeleteItem}
+                                handleEdit={handleEditItem}
+                              />
+                            </article>
+                          )}
+                        </Draggable>
+                      );
+                    })}
                   </div>
                   {provided.placeholder}
                 </section>

@@ -40,7 +40,7 @@ const ListTitle = ({ isEditing, setIsEditing, name, setListName }) => {
         type="text"
         autoFocus={true}
         value={title}
-        className="w-full p-1 text-base text-dark-blue focus:outline-none"
+        className="w-full py-1 px-4 text-base text-dark-blue focus:outline-none"
         onChange={(e) => setTitle(e.target.value)}
       />
       <div className="flex space-x-4">

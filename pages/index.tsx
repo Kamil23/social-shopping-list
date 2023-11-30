@@ -46,6 +46,12 @@ export default function Home() {
 
 const FavoritesList = ({ favoritesList, handleCreateSession, isLoading }) => {
   const router = useRouter();
+  const [updatedFavoritesList, setUpdatedFavoritesList] = useState([]);
+
+  useEffect(() => {
+    setUpdatedFavoritesList(favoritesList);
+  }, [favoritesList]);
+
   return (
     <div className="flex flex-col">
       {/* * header
@@ -55,8 +61,8 @@ const FavoritesList = ({ favoritesList, handleCreateSession, isLoading }) => {
 
       {/** list */}
       <div className="flex-1 m-5 flex flex-col space-y-3 overflow-y-auto mb-[225px]">
-        {favoritesList.map((list) => (
-          <ListElement key={1} list={list} />
+        {updatedFavoritesList.map((list) => (
+          <ListElement key={1} list={list} setUpdatedFavoritesList={setUpdatedFavoritesList} />
         ))}
       </div>
 
@@ -104,10 +110,28 @@ const FavoritesList = ({ favoritesList, handleCreateSession, isLoading }) => {
   );
 };
 
-const ListElement = ({ list }) => {
+const ListElement = ({ list, setUpdatedFavoritesList }) => {
   const router = useRouter();
   const { name, updatedAt, id } = list;
   const date = new Date(updatedAt);
+
+  const handleDeleteList = (e) => {
+    e.stopPropagation();
+    const parsedFavoritesList = JSON.parse(
+      window.localStorage.getItem("favoritesList")
+    );
+    const updatedFavoritesList = parsedFavoritesList.filter(
+      (list) => list.id !== id
+    );
+    window.localStorage.setItem(
+      "favoritesList",
+      JSON.stringify(updatedFavoritesList)
+    );
+    setUpdatedFavoritesList(updatedFavoritesList);
+    if (updatedFavoritesList.length === 0) {
+      router.reload();
+    }
+  };
   return (
     <button
       className="px-3 py-4 flex rounded-lg bg-[#EFF7FF] space-x-4 justify-between items-center"
@@ -125,7 +149,7 @@ const ListElement = ({ list }) => {
           .toLocaleDateString()
           .replaceAll("/", ".")} ${date.toLocaleTimeString()}`}</span>
       </div>
-      <div className="p-2 flex justify-center items-center">
+      <button className="p-2 flex justify-center items-center" onClick={(e) => handleDeleteList(e)}>
         <Image
           src="/icons/close.svg"
           alt="ikona usunięcia listy"
@@ -133,7 +157,7 @@ const ListElement = ({ list }) => {
           height={12}
           className="w-3 h-3"
         />
-      </div>
+      </button>
     </button>
   );
 };

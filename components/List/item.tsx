@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { RiLoader5Fill } from "react-icons/ri";
 import Checkbox from "../Checkbox";
 import Image from "next/image";
+import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 export default function ListItem({
   data,
@@ -12,6 +13,7 @@ export default function ListItem({
   draggableId,
   toggleCheck,
   handleDelete,
+  handleEdit,
 }: {
   data: Item;
   isDragging: boolean;
@@ -24,26 +26,22 @@ export default function ListItem({
     setUpdateTime: Dispatch<SetStateAction<string>>
   ) => void;
   handleDelete: (id: string) => void;
+  handleEdit: (id: string, title: string) => void;
 }) {
-  const { id, title, updatedAt, isDisabled } = data;
+  const { id, title: initTitle, updatedAt, isDisabled } = data;
   const [isChecked, setIsChecked] = useState(isDisabled || false);
-  const [updateTime, setUpdateTime] = useState(updatedAt);
-
-  const renderDate = (itemDateString: string) => {
-    const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-    const nowUnix = new Date().getTime();
-    const itemDateUnix = new Date(itemDateString).getTime();
-
-    if (nowUnix - itemDateUnix <= ONE_DAY_IN_MS) {
-      return new Date(updateTime).toLocaleTimeString().slice(0, -3);
-    }
-    return new Date(updateTime).toLocaleDateString();
-  };
+  const [_, setUpdateTime] = useState(updatedAt);
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(initTitle);
 
   useEffect(() => {
     setIsChecked(isDisabled);
-    setUpdateTime(updatedAt);
   }, [isDisabled, updatedAt]);
+
+  useEffect(() => {
+    setTitle(initTitle);
+  }, [initTitle]);
+
   return (
     <div
       className={`w-full flex px-4 py-2 space-x-2 items-center ${clsx({
@@ -51,18 +49,48 @@ export default function ListItem({
         ["bg-light-blue text-slate-300"]: isDragging && draggableId === id,
       })}`}
     >
-      <Checkbox isChecked={isChecked} isDisabled={false} onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)} id={id}/>
+      <Checkbox
+        isChecked={isChecked}
+        isDisabled={false}
+        onChange={() => toggleCheck(id, isChecked, setIsChecked, setUpdateTime)}
+        id={id}
+      />
       <div className="flex w-full justify-between items-center">
-        <div className={`mx-4 font-anek-latin text-base font-light text-[#3D3D3E] ${clsx({
-        ["opacity-50"]: isChecked,
-      })}`}>{title}</div>
-        <div className="flex relative items-center">
-          {isLoading && draggableId === id ? (
-            <RiLoader5Fill
-              className={`animate-spin text-lg absolute right-2 text-slate-300`}
-            />
-          ) : null}
-        </div>
+        {isEditing && !isChecked ? (
+          <input
+            type="text"
+            autoFocus={true}
+            value={title}
+            className="w-full mx-4 font-anek-latin text-base text-dark-blue focus:outline-none"
+            onChange={(e) => {
+              setTitle(e.target.value);
+            }}
+          />
+        ) : (
+          <>
+            <div
+              className={`mx-4 font-anek-latin text-base font-light text-[#3D3D3E] ${clsx(
+                {
+                  ["opacity-50"]: isChecked,
+                }
+              )}`}
+              onClick={() => {
+                if (!isChecked) {
+                  setIsEditing(true);
+                }
+              }}
+            >
+              {title}
+            </div>
+            <div className="flex relative items-center">
+              {isLoading && draggableId === id ? (
+                <RiLoader5Fill
+                  className={`animate-spin text-lg absolute right-2 text-slate-300`}
+                />
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
       {/** TODO next feature */}
       {/* <div className="flex items-center">
@@ -76,15 +104,38 @@ export default function ListItem({
           />
         </button>
       </div> */}
-      <button className="w-12" onClick={() => handleDelete(id)}>
-      <Image
+      {isEditing ? (
+        <div className="flex space-x-4">
+        <button
+          className="text-lg text-dark-blue mr-4"
+          onClick={() => {
+            setIsEditing(false);
+          }}
+        >
+          <XMarkIcon width={24} height={24} />
+        </button>
+        <button
+          className="text-lg text-dark-blue pr-5"
+          onClick={() => {
+            setTitle(title);
+            handleEdit(id, title);
+            setIsEditing(false);
+          }}
+        >
+          <CheckIcon width={24} height={24} />
+        </button>
+      </div>
+      ) : (
+        <button className="w-12" onClick={() => handleDelete(id)}>
+          <Image
             src="/icons/close.svg"
             alt="ikona przycisku usuń element"
             width={16}
             height={16}
             className="w-3 h-3"
           />
-      </button>
-      </div>
+        </button>
+      )}
+    </div>
   );
 }
